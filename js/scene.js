@@ -7,5 +7,7 @@ export default class Floor {
         this.mesh = new THREE.Mesh(floorGeometry, floorMaterial);
         this.mesh.rotation.x = - Math.PI / 2;
         this.mesh.position.x = -9
+        this.mesh.castShadow = false;
+        this.mesh.receiveShadow = true;
     }
 }
