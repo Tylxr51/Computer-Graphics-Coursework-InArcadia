@@ -157,12 +157,14 @@ export default class PlayerControls {
         return this.currentFOV
     }
 
-    updatePlayerMotion() {
+    updatePlayerMotion(delta) {
+        // if movement is tiny, set it to 0
         if (this.velocity.length() < 0.01) { 
             this.velocity.x = 0;
             this.velocity.z = 0;
         }
     
+        // dampen velocity 
         this.velocity.x -= this.velocity.x * 30.0 * delta;
         this.velocity.z -= this.velocity.z * 30.0 * delta;
     

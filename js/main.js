@@ -37,7 +37,7 @@ function animate() {
         gameWorld.rigidBodies[i].mesh.quaternion.copy(quat3);
     }
 
-    playerControls.updatePlayerMotion();    //  update player motion
+    playerControls.updatePlayerMotion(delta);    //  update player motion
 
     gameWorld.renderer.render(gameWorld.scene, gameWorld.currentCamera );   //  render scene
 }
