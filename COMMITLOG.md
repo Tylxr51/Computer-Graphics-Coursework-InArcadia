@@ -1,6 +1,11 @@
 # Commit Log
 
 
+#### 23.12.25
+
+- Made a new player class that: creates a player, handles movement, binds the camera to the player.
+- Added a jump mechanic.
+
 #### 10.12.25
 
 - Refactored code

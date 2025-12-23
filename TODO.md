@@ -3,8 +3,9 @@
 
 ### Immediate
 
-- Move object creation to objectSpawner.js
-- Make a more general player class that can store hitbox, controls, etc and separate playerControls class 
+- Death and respawn screen
+- Add dash mechanic
+- Build tutorial level
 
 ### Long Term
 
@@ -13,9 +14,9 @@
 - [x] WASD Controls
 - [x] Sprint
 - [x] Implement Ammo
-- [ ] Lighting
-- [ ] Platformer camera toggle
-- [ ] Player sprite
-- [ ] Nicer main menu with settings
+- [x] Make player object
 - [ ] Build tutorial environment
+- [ ] Platformer camera toggle
+- [ ] Player model
+- [ ] Nicer main menu with settings
 - [ ] [More to be added]

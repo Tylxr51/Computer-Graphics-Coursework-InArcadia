@@ -2,7 +2,7 @@ import * as THREE from '/three.js-r170/build/three.module.js';
 import OverheadLights from '/js/lighting.js';  
 import { RigidBody } from '/js/objectSpawner.js'
 import World from '/js/buildWorld.js'
-import Player from '/js/controls.js'
+import Player from '/js/player.js'
 
 
 
