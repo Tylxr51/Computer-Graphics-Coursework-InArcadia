@@ -2,15 +2,17 @@ import * as THREE from '/three.js-r170/build/three.module.js';
 import OverheadLights from '/js/lighting.js';  
 import { RigidBody } from '/js/objectSpawner.js'
 import World from '/js/buildWorld.js'
-import PlayerControls from '/js/controls.js'
+import Player from '/js/controls.js'
 
 
 
 
 let gameWorld;          //  object that handles game environment (camera, renderer, physics initialisation)
-let playerControls;     //  object that handles player controls (listeners, movement, sprinting)
+let player;             //  object that handles player controls (listeners, movement, sprinting)
 
-const clock = new THREE.Clock();    //  clock to keep animations synchronised
+let gravityVector = new THREE.Vector3(0, -9.81, 0);     //  world gravity vector
+
+const clock = new THREE.Clock();                        //  clock to keep animations synchronised
 
 const instructions = document.getElementById( 'instructions' );     //  instructions menu
 const paused = document.getElementById( 'paused' );                 //  pause menu
@@ -21,23 +23,29 @@ const paused = document.getElementById( 'paused' );                 //  pause me
 
 function animate() {
 
-    requestAnimationFrame( animate );   //  schedule next frame
-    const delta = clock.getDelta();     //  update delta
+    requestAnimationFrame( animate );                       //  schedule next frame
+    const delta = clock.getDelta();                         //  update delta
     gameWorld.physicsWorld.stepSimulation( delta, 10 );     //  update physics sim by delta
 
+    // update rigid bodies mesh position according to physics simulation
     for (let i = 0; i < gameWorld.rigidBodies.length; ++i) {
-        gameWorld.rigidBodies[i].rigidBody.motionState.getWorldTransform(gameWorld.tmpTransform);
+        gameWorld.rigidBodies[i].rigidBody.motionState.getWorldTransform(gameWorld.tmpTransform);   // get world transform
 
+        // extract position and rotation
         const pos = gameWorld.tmpTransform.getOrigin();
         const quat = gameWorld.tmpTransform.getRotation();
         const pos3 = new THREE.Vector3(pos.x(), pos.y(), pos.z());
         const quat3 = new THREE.Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
         
+        // update mesh position and roatation
         gameWorld.rigidBodies[i].mesh.position.copy(pos3);
         gameWorld.rigidBodies[i].mesh.quaternion.copy(quat3);
     }
 
-    playerControls.updatePlayerMotion(delta);    //  update player motion
+
+    player.playerControls.updatePlayerMotion(gameWorld, delta);    //  move player according to user input
+
+    
 
     gameWorld.renderer.render(gameWorld.scene, gameWorld.currentCamera );   //  render scene
 }
@@ -45,9 +53,6 @@ function animate() {
 
 
 function createSceneObjects() {
-    // Set up floor
-    //const floor = new Floor();
-    //scene.add( floor.mesh );
 
     const floorGeometry = new THREE.BoxGeometry(30, 1, 10);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff});
@@ -62,21 +67,22 @@ function createSceneObjects() {
     const boxGeometry = new THREE.BoxGeometry();
     const boxMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
     const boxMesh = new THREE.Mesh( boxGeometry, boxMaterial );
-    boxMesh.position.set(0, 112.5, -2);    
+    boxMesh.position.set(0, 12.5, -0.5);    
     gameWorld.scene.add( boxMesh );
-
-    // const playerHitBox = new THREE.Mesh(new THREE.boxGeometry(), new THREE.MeshStandardMaterial())
 
 
     const rbFloor = new RigidBody();
     rbFloor.createBox(new THREE.Vector3(30, 1, 10), 0, floorMesh.position, floorMesh.quaternion);
+    rbFloor.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
     gameWorld.physicsWorld.addRigidBody(rbFloor.body);
 
     const rbBox = new RigidBody();
-    rbBox.createBox( new THREE.Vector3(30, 1, 10), 1, boxMesh.position, boxMesh.quaternion);
+    rbBox.createBox( new THREE.Vector3(1,1,1), 1, boxMesh.position, boxMesh.quaternion);
+    rbBox.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
     gameWorld.physicsWorld.addRigidBody(rbBox.body);
 
-    gameWorld.rigidBodies = [{mesh: boxMesh, rigidBody: rbBox}]
+    gameWorld.rigidBodies.push({mesh: boxMesh, rigidBody: rbBox});
+    gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
 
 
     // Set up sphere
@@ -108,13 +114,14 @@ async function main() {
     Ammo = AmmoLib;
 
     // make new world and initialise physics
-    gameWorld = new World;
+    gameWorld = new World(gravityVector);
     gameWorld.initPhysics();
 
     // make new player controls and add listeners
-    playerControls = new PlayerControls(gameWorld.currentCamera, gameWorld.renderer);
-    playerControls.menuControlListeners(instructions, paused, gameWorld.currentCamera, gameWorld.renderer)
-
+    const playerSpawnPosition = new THREE.Vector3(-5, 1, 0);
+    const playerSpawnQuaternion = new THREE.Quaternion(0, 0, 0, 1);
+    const playerSize = new THREE.Vector2(0.25, 0.5); // radius, height
+    player = new Player(playerSpawnPosition, playerSize, playerSpawnQuaternion, gameWorld, instructions, paused);
     // spawn objects
     createSceneObjects();
 
