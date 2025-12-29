@@ -3,9 +3,12 @@
 
 ### Immediate
 
-- Death and respawn screen
-- Add dash mechanic
-- Build tutorial level
+- add fov slider in settings
+- add settings menu in-game
+- add dash mechanic
+- build tutorial level
+- make main menu nicer
+- give in game menus buttons
 
 ### Long Term
 
@@ -15,8 +18,8 @@
 - [x] Sprint
 - [x] Implement Ammo
 - [x] Make player object
+- [x] Nicer main menu with settings
+- [x] Platformer camera toggle
 - [ ] Build tutorial environment
-- [ ] Platformer camera toggle
 - [ ] Player model
-- [ ] Nicer main menu with settings
 - [ ] [More to be added]

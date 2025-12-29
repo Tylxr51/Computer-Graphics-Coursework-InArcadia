@@ -1,5 +1,16 @@
 # Commit Log
 
+#### 29.12.25
+
+- Made a menu system where I moved the in-game menus to and added a main menu with settings and a level select
+- Created a level class to handle level environments
+- Created level loader and disposal functions to launch and exit levels without memory leaks
+- Created global variables file to handle variables that can be changed in settings and variables that should span the whole application
+- Added a debug mode
+- Made the pause menu stop gameloop and then restart when exited.
+- Added third person camera angle for platformer view
+- Added an abort controller to remove all in-game listeners when level is exited
+- Updated all listener functions by assigning all arrow functions to variables
 
 #### 23.12.25
 

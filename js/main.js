@@ -1,133 +1,185 @@
 import * as THREE from '/three.js-r170/build/three.module.js'; 
 import OverheadLights from '/js/lighting.js';  
 import { RigidBody } from '/js/objectSpawner.js'
-import World from '/js/buildWorld.js'
-import Player from '/js/player.js'
+import Level from '/js/levelEnvironment.js'
+import { MainMainMenu, LevelsMainMenu, SettingsMainMenu } from '/js/menus.js'
 
 
+let mainMenu;
+let levelsMenu;
+let settingsMenu;
 
 
-let gameWorld;          //  object that handles game environment (camera, renderer, physics initialisation)
-let player;             //  object that handles player controls (listeners, movement, sprinting)
+function createSceneObjects(level) {
 
-let gravityVector = new THREE.Vector3(0, -9.81, 0);     //  world gravity vector
-
-const clock = new THREE.Clock();                        //  clock to keep animations synchronised
-
-const instructions = document.getElementById( 'instructions' );     //  instructions menu
-const paused = document.getElementById( 'paused' );                 //  pause menu
-
-
-
-
-
-function animate() {
-
-    requestAnimationFrame( animate );                       //  schedule next frame
-    const delta = clock.getDelta();                         //  update delta
-    gameWorld.physicsWorld.stepSimulation( delta, 10 );     //  update physics sim by delta
-
-    // update rigid bodies mesh position according to physics simulation
-    for (let i = 0; i < gameWorld.rigidBodies.length; ++i) {
-        gameWorld.rigidBodies[i].rigidBody.motionState.getWorldTransform(gameWorld.tmpTransform);   // get world transform
-
-        // extract position and rotation
-        const pos = gameWorld.tmpTransform.getOrigin();
-        const quat = gameWorld.tmpTransform.getRotation();
-        const pos3 = new THREE.Vector3(pos.x(), pos.y(), pos.z());
-        const quat3 = new THREE.Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
-        
-        // update mesh position and roatation
-        gameWorld.rigidBodies[i].mesh.position.copy(pos3);
-        gameWorld.rigidBodies[i].mesh.quaternion.copy(quat3);
-    }
-
-
-    player.playerControls.updatePlayerMotion(gameWorld, delta);    //  move player according to user input
-
-    
-
-    gameWorld.renderer.render(gameWorld.scene, gameWorld.currentCamera );   //  render scene
-}
-
-
-
-function createSceneObjects() {
-
-    const floorGeometry = new THREE.BoxGeometry(30, 1, 10);
+    const floorGeometry = new THREE.BoxGeometry(30, 0.5, 10);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff});
     const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
     floorMesh.position.x = -9
     floorMesh.position.y = -0.5;
     floorMesh.castShadow = false;
     floorMesh.receiveShadow = true;
-    gameWorld.scene.add( floorMesh );
+    level.gameWorld.scene.add( floorMesh );
 
     // Set up box
     const boxGeometry = new THREE.BoxGeometry();
     const boxMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
     const boxMesh = new THREE.Mesh( boxGeometry, boxMaterial );
-    boxMesh.position.set(0, 12.5, -0.5);    
-    gameWorld.scene.add( boxMesh );
+    boxMesh.position.set(0, 2.5, 0);    
+    level.gameWorld.scene.add( boxMesh );
 
 
     const rbFloor = new RigidBody();
-    rbFloor.createBox(new THREE.Vector3(30, 1, 10), 0, floorMesh.position, floorMesh.quaternion);
-    rbFloor.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
-    gameWorld.physicsWorld.addRigidBody(rbFloor.body);
+    rbFloor.createBox(new THREE.Vector3(30, 0.5, 10), 0, floorMesh.position, floorMesh.quaternion);
+    rbFloor.body.setCollisionFlags(Ammo.btCollisionObject.CF_STATIC_OBJECT);
+    level.gameWorld.physicsWorld.addRigidBody(rbFloor.body);
 
     const rbBox = new RigidBody();
     rbBox.createBox( new THREE.Vector3(1,1,1), 1, boxMesh.position, boxMesh.quaternion);
     rbBox.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
-    gameWorld.physicsWorld.addRigidBody(rbBox.body);
+    level.gameWorld.physicsWorld.addRigidBody(rbBox.body);
 
-    gameWorld.rigidBodies.push({mesh: boxMesh, rigidBody: rbBox});
-    gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
-
-
-    // Set up sphere
-    const sphereGeometry = new THREE.SphereGeometry(1);
-    const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-    const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    sphereMesh.position.set(0, 0.5, 2);
-    gameWorld.scene.add(sphereMesh);
+    level.gameWorld.rigidBodies.push({mesh: boxMesh, rigidBody: rbBox});
+    level.gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
 
 
     // Set up lighting
     const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
-    directionalLight.position.set(-2,2,0);
-    gameWorld.scene.add(directionalLight);
+    directionalLight.position.set(-1,1,0);
+    level.gameWorld.scene.add(directionalLight);
 
     const dlighthelper = new THREE.DirectionalLightHelper(directionalLight);
-    gameWorld.scene.add(dlighthelper);
+    level.gameWorld.scene.add(dlighthelper);
 
     const overheadLights = new OverheadLights();
-    gameWorld.scene.add(overheadLights.light1);
+    level.gameWorld.scene.add(overheadLights.light1);
+
+}
+
+function createSceneObjectstemp(level) {
+
+    const floorGeometry = new THREE.BoxGeometry(30, 0.5, 10);
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff});
+    const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+    floorMesh.position.x = -9
+    floorMesh.position.y = -0.5;
+    floorMesh.castShadow = false;
+    floorMesh.receiveShadow = true;
+    level.gameWorld.scene.add( floorMesh );
+
+    // Set up box
+    const boxGeometry = new THREE.BoxGeometry();
+    const boxMaterial = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+    const boxMesh = new THREE.Mesh( boxGeometry, boxMaterial );
+    boxMesh.position.set(0, 2.5, 0);    
+    level.gameWorld.scene.add( boxMesh );
+
+
+    const rbFloor = new RigidBody();
+    rbFloor.createBox(new THREE.Vector3(30, 0.5, 10), 0, floorMesh.position, floorMesh.quaternion);
+    rbFloor.body.setCollisionFlags(Ammo.btCollisionObject.CF_STATIC_OBJECT);
+    level.gameWorld.physicsWorld.addRigidBody(rbFloor.body);
+
+    const rbBox = new RigidBody();
+    rbBox.createBox( new THREE.Vector3(1,1,1), 1, boxMesh.position, boxMesh.quaternion);
+    rbBox.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
+    level.gameWorld.physicsWorld.addRigidBody(rbBox.body);
+
+    level.gameWorld.rigidBodies.push({mesh: boxMesh, rigidBody: rbBox});
+    level.gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
+
+
+    // Set up lighting
+    const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
+    directionalLight.position.set(-1,1,0);
+    level.gameWorld.scene.add(directionalLight);
+
+    const dlighthelper = new THREE.DirectionalLightHelper(directionalLight);
+    level.gameWorld.scene.add(dlighthelper);
+
+    const overheadLights = new OverheadLights();
+    level.gameWorld.scene.add(overheadLights.light1);
 
 }
 
 
+function launchLevel() {
 
+    mainMenu.hideMenu();        // hide main menu
+    
+    currentLevelAbortController = new AbortController()                         // object to remove all in-game listeners
+
+    currentLevelEnvironment = new Level( currentLevelAbortController );         // create level environment
+
+    gameInProgress = true;      // change game state variable
+
+    switch ( levelIndex ) {
+        
+        case 0:
+
+            createSceneObjects( currentLevelEnvironment );      // create scene
+            
+            break;
+            
+            
+        case 1:
+                
+
+            createSceneObjectstemp( currentLevelEnvironment );      // create scene
+            
+            break;
+    }
+
+
+    currentLevelEnvironment.gameloop();                // start gameloop
+}
+
+// function called on exiting level
+function exitLevel() {
+
+    gameInProgress = false;         // change game state variable
+
+    currentLevelEnvironment.disposeLevel();     // dispose current level
+    currentLevelEnvironment = null;
+
+    
+    mainMenu.showMenu();            // show main menu
+
+}
+
+
+// load physics engine and show main menu
 async function main() {
+
     // load ammo
     const AmmoLib = await Ammo();
     Ammo = AmmoLib;
 
-    // make new world and initialise physics
-    gameWorld = new World(gravityVector);
-    gameWorld.initPhysics();
+    document.body.style.margin = '0';       // remove borders around canvas
 
-    // make new player controls and add listeners
-    const playerSpawnPosition = new THREE.Vector3(-5, 1, 0);
-    const playerSpawnQuaternion = new THREE.Quaternion(0, 0, 0, 1);
-    const playerSize = new THREE.Vector2(0.25, 0.5); // radius, height
-    player = new Player(playerSpawnPosition, playerSize, playerSpawnQuaternion, gameWorld, instructions, paused);
-    // spawn objects
-    createSceneObjects();
+    // initialise main menus
+    settingsMenu = new SettingsMainMenu( 'settings-menu' );
+    levelsMenu = new LevelsMainMenu( 'levels-menu' );
+    mainMenu = new MainMainMenu( 'main-menu', levelsMenu, settingsMenu );
 
-    // start animation loop
-    animate();
+    // function called on level selection
+    let onLaunchLevel = ( e ) => {
+
+        levelIndex = e.detail.level;
+        launchLevel();
+
+    }
+    let onExitLevel = () => { exitLevel(); }        // function called on level exit
+
+    // make listeners
+    document.addEventListener( 'launch-level', onLaunchLevel );     // launch level listener
+    document.addEventListener( 'exit-level', onExitLevel );         // exit level listener
+    
+    gameInProgress = false;             // change game state variable
+
+    mainMenu.showMenu();                // show main menu
+
 }
 
-// Load and start game
+// Load and launch into main menu
 main();

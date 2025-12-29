@@ -2,81 +2,144 @@ import * as THREE from '/three.js-r170/build/three.module.js';
 import { PointerLockControls } from '/three.js-r170/examples/jsm/controls/PointerLockControls.js'; 
 
 export default class Player {
-    constructor(position, size, quaternion, gameWorld, instructions, paused) {
+    
+    // initialise player
+    constructor(size, gameWorld) {
 
-        // PLAYER PHYSICS
+        this.playerIsDead = false;      // variable to track if player is dead for menu logic
+
+        //////////// PLAYER PHYSICS ////////////
+
+        this.gameWorld = gameWorld;     // define gameWorld
 
         // set up player physics shape
         this.playerRadius = size.x;
         this.playerHeight = size.y;
-        this.playerShape = new Ammo.btCapsuleShape(this.playerRadius, this.playerHeight);
+        this.playerShape = new Ammo.btCapsuleShape( this.playerRadius, this.playerHeight );
 
         this.maxStepHeight = 0.2;       // max height the player can step up onto
 
-        // set up player transform 
-        this.playerTransform = new Ammo.btTransform();
-        this.playerTransform.setIdentity();
-        this.playerTransform.setOrigin( new Ammo.btVector3( position.x, position.y, position.z ) );
-        this.playerTransform.setRotation( 
-            new Ammo.btQuaternion( quaternion.x, quaternion.y, quaternion.z, quaternion.w ) 
-        );   
+        this.playerTransform = new Ammo.btTransform();      // set up player transform 
 
         // set up player ghost object
         this.ghostObject = new Ammo.btPairCachingGhostObject();
-        this.ghostObject.setWorldTransform(this.playerTransform);
-        this.ghostObject.setCollisionShape(this.playerShape);
-        this.ghostObject.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);     // collide with other objects with this flag
+        this.ghostObject.setCollisionShape( this.playerShape );
+        this.ghostObject.setCollisionFlags( Ammo.btCollisionObject.CF_CHARACTER_OBJECT) ;     // lets physicsWorld know which objects this should collide with
 
         // set up player kinematic controller
-        this.controller = new Ammo.btKinematicCharacterController(
+        this.movementController = new Ammo.btKinematicCharacterController(
             this.ghostObject,
             this.playerShape,
             this.maxStepHeight
         );
 
         // add player ghost object to physics world for collision detection
-        gameWorld.physicsWorld.addCollisionObject(
+        this.gameWorld.physicsWorld.addCollisionObject(
             this.ghostObject,
             Ammo.btBroadphaseProxy.CharacterFilter,
             Ammo.btBroadphaseProxy.StaticFilter | Ammo.btBroadphaseProxy.DefaultFilter
         );
 
         // set gravity for player controller
-        this.controller.setGravity(- 5 * gameWorld.gravityVector.y);
-
-        // add player controller to physics world to enable movement
-        gameWorld.physicsWorld.addAction(this.controller);
+        this.movementController.setGravity( - 5 * this.gameWorld.gravityVector.y );       // multiply gravity for player to make jump less floaty
 
 
-        // PLAYER MESH
 
-        // set up wireframe capsule mesh to represent player
-        this.playerGeometry = new THREE.CapsuleGeometry(this.playerRadius, this.playerHeight, 2, 8, 1);
-        this.playerWireframe = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
-        this.playerMesh = new THREE.Mesh(this.playerGeometry, this.playerWireframe);
+        //////////// PLAYER MESH ////////////
 
-        // set initial position and rotation of player mesh
-        this.playerMesh.position.set(position.x, position.y, position.z)
-        this.playerMesh.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
+        // set up wireframe capsule mesh to represent player (used for debugging purposes, set to transparent when debugger is off)
+        this.playerGeometry = new THREE.CapsuleGeometry( this.playerRadius, this.playerHeight, 2, 8, 1 );
+        this.playerWireframe = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
 
-        // add player mesh to scene
-        gameWorld.scene.add(this.playerMesh);
+        this.playerWireframe.transparent = !debug;          // make transparent if debug is on
+        this.playerWireframe.opacity = Number( debug );     // have to set opacity to 0 as well to make it transparent
 
-        // INITIALISE PLAYER CONTROLS
-        this.playerControls = new PlayerControls(this, gameWorld.currentCamera, gameWorld.renderer, this.controller, instructions, paused);
+        this.playerMesh = new THREE.Mesh( this.playerGeometry, this.playerWireframe );
+
+        //////////// INITIALISE PLAYER CONTROLS ////////////
+
+        this.playerControls = new PlayerControls( this, 
+                                                  this.gameWorld.firstPersonCamera, 
+                                                  this.gameWorld.renderer, 
+                                                  this.movementController 
+                                                );
 
     }
+
+    // player spawning function
+    spawnPlayer( isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
+
+        // set spawn position and orientation
+        this.playerTransform.setIdentity();
+        this.playerTransform.setOrigin( ammoPlayerSpawnPosition );
+        this.playerTransform.setRotation( ammoPlayerSpawnQuaternion );   
+
+        // move ghost object according to spawn position and orientation
+        this.ghostObject.setWorldTransform( this.playerTransform );
+
+
+        // set initial position and rotation of player mesh
+        this.playerMesh.position.set(   ammoPlayerSpawnPosition.x(), 
+                                        ammoPlayerSpawnPosition.y(), 
+                                        ammoPlayerSpawnPosition.z()
+                                    );
+        this.playerMesh.quaternion.set( ammoPlayerSpawnQuaternion.x(), 
+                                        ammoPlayerSpawnQuaternion.y(), 
+                                        ammoPlayerSpawnQuaternion.z(), 
+                                        ammoPlayerSpawnQuaternion.w()
+                                    );
+
+
+        // check if spawning for the first time
+        if ( isInitialSpawn ) {
+
+            // add player controller to physics world to enable movement
+            this.gameWorld.physicsWorld.addAction( this.movementController );
+
+            // add player mesh to scene
+            this.gameWorld.scene.add( this.playerMesh );
+        }
+
+        // create a new document wide event to swap to first person camera on spawn
+        document.dispatchEvent( new CustomEvent( 'spawn-set-first-person-camera' ) );
+
+        this.playerIsDead = false;
+    }
+
+    // player disposal function
+    disposePlayer() {
+
+        this.playerControls.disposePlayerControls();    // dispose playerControls
+
+        // destroy ammo variables
+        Ammo.destroy( this.playerShape );
+        Ammo.destroy( this.playerTransform );
+        Ammo.destroy( this.ghostObject );
+        Ammo.destroy( this.movementController );
+
+        // set variables to null
+        this.gameWorld = null;
+        this.playerControls = null;
+        this.playerShape = null;
+        this.playerTransform = null;
+        this.ghostObject = null;
+        this.movementController = null;
+
+    }
+
 }
 
 class PlayerControls {
-    constructor(player, camera, renderer, controller, instructions, paused) {
+
+    constructor( player, camera, renderer, movementController ) {
+
         // set up player, camera, renderer, controllers, and camera controls
         this.player = player;
         this.camera = camera
         this.renderer = renderer
-        this.controller = controller;
-        this.controls = new PointerLockControls( this.camera, this.renderer.domElement );
-        this.controls.pointerSpeed = 0.5;
+        this.movementController = movementController;
+        this.cameraController = new PointerLockControls( this.camera, this.renderer.domElement );
+        this.cameraController.pointerSpeed = 0.5;
 
         // set movement variables
         this.moveForward = false;
@@ -89,8 +152,7 @@ class PlayerControls {
 
         // set sprint and sprint settings variables
         this.sprint = false;
-        this.toggleSprint = true;
-        this.stationaryIsToggle = true;
+        this.FOVChangeSpeed = 0.3;      // how quickly FOV changes when player starts/stops sprinting
 
         // set movement speed variables
         this.walkSpeed = 7 / 100;
@@ -98,96 +160,118 @@ class PlayerControls {
         this.movementSpeed = this.walkSpeed;
 
         // set jump speed
-        this.controller.setJumpSpeed(12);
+        this.jumpSpeed = 12
+        this.movementController.setJumpSpeed( this.jumpSpeed );
 
         // set up direction vectors for calculating movement later
-        this.lookDirection = new THREE.Vector3(0, 0, 0);
-        this.inputDirection = new THREE.Vector2(0, 0);
-        this.forwardVector = new THREE.Vector3(0, 0, 0);
-        this.rightVector = new THREE.Vector3(0, 0, 0);
-        this.movementDirection = new THREE.Vector3(0, 0, 0);
-        this.scaledMovementDirection = new THREE.Vector3(0, 0, 0);
+        this.lookDirection              = new THREE.Vector3(  0, 0, 0 );
+        this.inputDirection             = new THREE.Vector2(  0, 0    );
+        this.forwardVector              = new THREE.Vector3(  0, 0, 0 );
+        this.rightVector                = new THREE.Vector3(  0, 0, 0 );
+        this.movementDirection          = new THREE.Vector3(  0, 0, 0 );
+        this.scaledMovementDirection    = new THREE.Vector3(  0, 0, 0 );
+        this.tmpScaledMovementDirection = new Ammo.btVector3( 0, 0, 0 );
 
-        // add menus
-        this.menuControlListeners(instructions, paused);
 
     }
 
-    // handle key down events
-    onKeyDown = (event) => {
+    // function for key down events relating to player movement
+    onKeyDown = ( event ) => {
+
         // check key pressed
         switch ( event.code ) {
+
             // wasd
             case 'KeyW':
+
                 this.moveForward = true;
+
                 break;
 
             case 'KeyA':
+
                 this.moveLeft = true;
+
                 break;
 
             case 'KeyS':
+
                 this.moveBackward = true;
+
                 break;
 
             case 'KeyD':
+
                 this.moveRight = true;
+
                 break;
 
             // jump
             case 'Space':
-                 if ( this.canJump === true ) this.controller.jump();
+
+                 if ( this.canJump === true ) { this.movementController.jump(); }
+
                  this.canJump = false;
+
                  break;
 
             // sprint
             case 'ShiftLeft':
+
                 // pressing shift key down turns on and off sprinting
-                if (this.toggleSprint && !this.stationaryIsToggle) {
-                    this.sprint = !this.sprint;
-                }
+                if (toggleSprint && !stationaryIsToggle) { this.sprint = !this.sprint; }
 
                 // pressing shift key down only turns on sprinting, doesn't turn off sprinting
-                else {
-                    this.sprint = true;
-                }
+                else { this.sprint = true; }
+
                 break;
         }
     }
 
-    // handle key up events
+    // function for key up events
     onKeyUp = (event) => {
+
         // check key pressed
         switch ( event.code ) {
+
             // wasd
             case 'KeyW':
+
                 this.moveForward = false;
+
                 break;
 
             case 'KeyA':
+
                 this.moveLeft = false;
+
                 break;
 
             case 'KeyS':
+
                 this.moveBackward = false;
+
                 break;
 
             case 'KeyD':
+
                 this.moveRight = false;
+
                 break;
 
             // sprint
             case 'ShiftLeft':
+
                 // releasing shift key turns off sprinting
-                if (!this.toggleSprint) {
-                    this.sprint = false;
-                }
+                if ( !toggleSprint ) { this.sprint = false; }
+
                 break;
         }
     }
 
     // disable movement listeners for menu screens
     turnOffMovement() {
+
         // remove movement listeners
         document.removeEventListener( 'keydown', this.onKeyDown );
         document.removeEventListener( 'keyup', this.onKeyUp );
@@ -198,67 +282,50 @@ class PlayerControls {
 
     // enable movement listeners for gameplay
     turnOnMovement() {
+
         // add movement listeners
         document.addEventListener( 'keydown', this.onKeyDown );
         document.addEventListener( 'keyup', this.onKeyUp );
     }
 
 
-    // set up menu listeners
-    menuControlListeners(instructions, paused) {
-        // lock pointer when user clicks on instructions menu
-        instructions.addEventListener( 'click', () => {
-            this.controls.lock();
-        } );
+    sprintLogic( minFOV, maxFOV, FOVChangeSpeed ) {
 
-        // lock pointer when user clicks on paused menu
-        paused.addEventListener( 'click', () => {
-            this.controls.lock();
-        } );
-
-        // hide menu screen and enable movement when pointer is locked
-        this.controls.addEventListener('lock', () => {
-            instructions.style.display = 'none';
-            paused.style.display = 'none';
-            this.turnOnMovement();
-        } );
-
-        // show pause menu and diable movement when pointer is unlocked
-        this.controls.addEventListener('unlock', () => {
-            instructions.style.display = 'none';
-            paused.style.display = 'flex';
-            this.turnOffMovement();
-        } );  
-    }
-
-    sprintLogic(minFOV, maxFOV, FOVChangeSpeed) {
         // set default movementSpeed and get currentFOV
         this.movementSpeed = this.walkSpeed;
         this.currentFOV = this.camera.fov;
 
         // checks if the player was moving and has just stopped and disables sprint when stationaryIsToggle is on
-        if (this.inputDirection.length() === 0 && 
-            this.scaledMovementDirection.length() !== 0 && 
-            this.toggleSprint && 
-            this.stationaryIsToggle ) {
+        if ( this.inputDirection.length() === 0 && 
+             this.scaledMovementDirection.length() !== 0 && 
+             toggleSprint && 
+             stationaryIsToggle ) {
+
                 this.sprint = false;
         }
 
         // reduce FOV when stationary
-        if (this.scaledMovementDirection.length() === 0) {
+        if ( this.scaledMovementDirection.length() === 0 ) {
+
             this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, minFOV, FOVChangeSpeed );
+
         }
 
         else {
+
             // increase movementSpeed and FOV is moving and sprinting
-            if (this.sprint) {
+            if ( this.sprint ) {
+
                 this.movementSpeed = this.runSpeed;
                 this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, maxFOV, FOVChangeSpeed );
+
             }
             
             // decrease FOV is moving but not sprinting
             else {
+
                 this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, minFOV, FOVChangeSpeed );
+            
             }
         }
 
@@ -267,9 +334,10 @@ class PlayerControls {
         this.camera.updateProjectionMatrix();
     }
 
-    updatePlayerMotion(gameWorld) {
+    updatePlayerMotion( gameWorld ) {
+
         // find direction camera is looking
-        gameWorld.currentCamera.getWorldDirection( this.lookDirection );
+        gameWorld.firstPersonCamera.getWorldDirection( this.lookDirection );
         this.lookDirection.y = 0;
         this.lookDirection.normalize();
 
@@ -280,10 +348,10 @@ class PlayerControls {
 
         // calculate forward and right vectors
         this.forwardVector = this.lookDirection;
-        this.rightVector.crossVectors( this.forwardVector, new THREE.Vector3(0, 1, 0) );
+        this.rightVector.crossVectors( this.forwardVector, new THREE.Vector3( 0, 1, 0 ) );
 
         // handle sprinting logic
-        this.sprintLogic(75, 90, 0.3);
+        this.sprintLogic( walkFOV, runFOV, this.FOVChangeSpeed );
 
         // calculate movementDirection
         this.movementDirection.set(0, 0, 0);
@@ -293,30 +361,56 @@ class PlayerControls {
 
 
         // scale movement according to movement speed
-        this.scaledMovementDirection.copy(this.movementDirection).multiplyScalar(this.movementSpeed);
-
+        this.scaledMovementDirection.copy( this.movementDirection ).multiplyScalar( this.movementSpeed );
+        this.tmpScaledMovementDirection.setValue( this.scaledMovementDirection.x, 
+                                                  this.scaledMovementDirection.y, 
+                                                  this.scaledMovementDirection.z
+                                                );
 
         // move player according to movement direction
-        this.controller.setWalkDirection( 
-            new Ammo.btVector3( this.scaledMovementDirection.x, 
-                                this.scaledMovementDirection.y, 
-                                this.scaledMovementDirection.z
-                            ) 
-        );
+        this.movementController.setWalkDirection( this.tmpScaledMovementDirection );
 
         // update player mesh position according to physics simulation
         this.ghostLocation = this.player.ghostObject.getWorldTransform().getOrigin();
-        this.player.playerMesh.position.set(this.ghostLocation.x(), this.ghostLocation.y(), this.ghostLocation.z());
+        this.player.playerMesh.position.set( this.ghostLocation.x(), 
+                                             this.ghostLocation.y(), 
+                                             this.ghostLocation.z() 
+                                            );
 
         // update camera location to player location
-        gameWorld.currentCamera.position.set(
-            this.ghostLocation.x(),
-            this.ghostLocation.y() + (this.player.playerHeight / 2),
-            this.ghostLocation.z()
-        );
+        gameWorld.firstPersonCamera.position.set( this.ghostLocation.x(),
+                                                  this.ghostLocation.y() + (this.player.playerHeight / 2),
+                                                  this.ghostLocation.z()
+                                                );
         
         // check if player is on ground to allow jumping
-        this.canJump = (this.controller.onGround());  
+        this.canJump = ( this.movementController.onGround() );  
+    }
+
+    // player controls disposal function
+    disposePlayerControls() {
+        
+        // set variables to null
+        this.player = null;
+        this.camera = null;
+        this.renderer = null;
+        this.movementController = null;
+        this.cameraController.unlock();     // unlock player cursor
+        this.cameraController.dispose();    // removes pointer lock listeners
+        this.cameraController = null;
+
+        this.lookDirection = null;
+        this.inputDirection = null;
+        this.forwardVector = null;
+        this.rightVector = null;
+        this.movementDirection = null;
+        this.scaledMovementDirection = null;
+
+        this.turnOffMovement();             // remove movement listeners
+
+        Ammo.destroy(this.tmpScaledMovementDirection);
+        this.tmpScaledMovementDirection = null;
+
     }
     
 }
