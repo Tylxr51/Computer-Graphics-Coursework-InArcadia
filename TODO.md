@@ -3,9 +3,12 @@
 
 ### Immediate
 
+ERRORS:
+- if you spam respawn it respawns you loads: change it to wait then dispatch event not dispatch then wait
+
+- add lighter helper to debug
 - add fov slider in settings
 - add settings menu in-game
-- add dash mechanic
 - build tutorial level
 - make main menu nicer
 - give in game menus buttons

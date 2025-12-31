@@ -46,6 +46,7 @@ export default class World {
         this.thirdPersonCameraNear = 0.1;
         this.thirdPersonCameraFar = 1000;
         this.thirdPersonCameraZoom = 0.01;
+        this.thirdPersonCameraDistanceFromScene = 10;
         this.thirdPersonCamera = new THREE.OrthographicCamera( this.thirdPersonCameraLeft,
                                                                this.thirdPersonCameraRight,
                                                                this.thirdPersonCameraTop,
@@ -56,10 +57,6 @@ export default class World {
 
         // set camera aspect ratios
         this.setCameraAspectRatios();
-
-        // CHANGE THIS TO FOLLOW PLAYER IN GAMELOOP
-        this.thirdPersonCamera.position.set( 0,2,10 )
-        this.thirdPersonCamera.lookAt( new THREE.Vector3( 0, 1.9, 0 ) );
 
         this.cameraArray = [ this.firstPersonCamera, this.thirdPersonCamera ];
         this.firstPersonCameraIndex = 0;
@@ -135,8 +132,8 @@ export default class World {
     updateRigidBodyMeshToSimulation() {
 
         for ( let i = 0; i < this.rigidBodies.length; ++i ) {
-            
-            this.rigidBodies[i].rigidBody.motionState.getWorldTransform( this.tmpTransform );   // get world transform
+
+            this.rigidBodies[i].motionstate.getWorldTransform( this.tmpTransform );   // get world transform
 
             // extract position and rotation
             this.ammoCurrentRBPos = this.tmpTransform.getOrigin();
@@ -187,14 +184,12 @@ export default class World {
 
 
         // destroy ammo objects
-        Ammo.destroy( this.physicsWorld )
-        Ammo.destroy( this.tmpTransform )
-        Ammo.destroy( this.collisionConfiguration )
-        Ammo.destroy( this.dispatcher )
-        Ammo.destroy( this.broadphase )
-        Ammo.destroy( this.solver )
-        Ammo.destroy( this.ammoCurrentRBPos )
-        Ammo.destroy( this.ammoCurrentRBQuat )
+        Ammo.destroy( this.physicsWorld );
+        Ammo.destroy( this.tmpTransform );
+        Ammo.destroy( this.collisionConfiguration );
+        Ammo.destroy( this.dispatcher );
+        Ammo.destroy( this.broadphase );
+        Ammo.destroy( this.solver );
         Ammo.destroy( this.ammoGhostPairCallback );
 
         // set variables to null

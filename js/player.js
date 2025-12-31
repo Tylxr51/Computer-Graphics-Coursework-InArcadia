@@ -19,7 +19,7 @@ export default class Player {
 
         this.maxStepHeight = 0.2;       // max height the player can step up onto
 
-        this.playerTransform = new Ammo.btTransform();      // set up player transform 
+        this.transform = new Ammo.btTransform();      // set up player transform 
 
         // set up player ghost object
         this.ghostObject = new Ammo.btPairCachingGhostObject();
@@ -69,13 +69,12 @@ export default class Player {
     // player spawning function
     spawnPlayer( isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
 
-        // set spawn position and orientation
-        this.playerTransform.setIdentity();
-        this.playerTransform.setOrigin( ammoPlayerSpawnPosition );
-        this.playerTransform.setRotation( ammoPlayerSpawnQuaternion );   
+        // set spawn position (don't have to worry about orientation as ghost object never rotates, only camera)
+        this.transform.setIdentity();
+        this.transform.setOrigin( ammoPlayerSpawnPosition );
 
         // move ghost object according to spawn position and orientation
-        this.ghostObject.setWorldTransform( this.playerTransform );
+        this.ghostObject.setWorldTransform( this.transform );
 
 
         // set initial position and rotation of player mesh
@@ -113,7 +112,7 @@ export default class Player {
 
         // destroy ammo variables
         Ammo.destroy( this.playerShape );
-        Ammo.destroy( this.playerTransform );
+        Ammo.destroy( this.transform );
         Ammo.destroy( this.ghostObject );
         Ammo.destroy( this.movementController );
 
@@ -121,7 +120,7 @@ export default class Player {
         this.gameWorld = null;
         this.playerControls = null;
         this.playerShape = null;
-        this.playerTransform = null;
+        this.transform = null;
         this.ghostObject = null;
         this.movementController = null;
 
@@ -152,11 +151,18 @@ class PlayerControls {
 
         // set sprint and sprint settings variables
         this.sprint = false;
-        this.FOVChangeSpeed = 0.3;      // how quickly FOV changes when player starts/stops sprinting
+        this.dash = false;
+
+        this.currentFOV;
+        this.FOVWalkRunChangeSpeed = 0.3;      // how quickly FOV changes when player starts/stops sprinting
+        this.FOVDashChangeSpeed = 0.1;
 
         // set movement speed variables
-        this.walkSpeed = 7 / 100;
-        this.runSpeed = 1.5 * this.walkSpeed;
+        this.walkSpeed = 6 / 100;
+        this.runSpeed = 1.7 * this.walkSpeed;
+        this.dashSpeed = 10 * this.walkSpeed;
+        this.currentDashSpeed = this.dashSpeed;
+
         this.movementSpeed = this.walkSpeed;
 
         // set jump speed
@@ -164,6 +170,7 @@ class PlayerControls {
         this.movementController.setJumpSpeed( this.jumpSpeed );
 
         // set up direction vectors for calculating movement later
+        this.dashDirection              = new THREE.Vector3(  0, 0, 0 );
         this.lookDirection              = new THREE.Vector3(  0, 0, 0 );
         this.inputDirection             = new THREE.Vector2(  0, 0    );
         this.forwardVector              = new THREE.Vector3(  0, 0, 0 );
@@ -171,6 +178,8 @@ class PlayerControls {
         this.movementDirection          = new THREE.Vector3(  0, 0, 0 );
         this.scaledMovementDirection    = new THREE.Vector3(  0, 0, 0 );
         this.tmpScaledMovementDirection = new Ammo.btVector3( 0, 0, 0 );
+
+        this.testerVector = new THREE.Vector3(  1, 2, 3 );
 
 
     }
@@ -206,6 +215,12 @@ class PlayerControls {
 
                 break;
 
+            case 'KeyR':
+
+                this.startDash = true;
+
+                break;
+
             // jump
             case 'Space':
 
@@ -219,7 +234,7 @@ class PlayerControls {
             case 'ShiftLeft':
 
                 // pressing shift key down turns on and off sprinting
-                if (toggleSprint && !stationaryIsToggle) { this.sprint = !this.sprint; }
+                if ( toggleSprint && !stationaryIsToggle ) { this.sprint = !this.sprint; }
 
                 // pressing shift key down only turns on sprinting, doesn't turn off sprinting
                 else { this.sprint = true; }
@@ -288,12 +303,40 @@ class PlayerControls {
         document.addEventListener( 'keyup', this.onKeyUp );
     }
 
+    dashLogic() {
 
-    sprintLogic( minFOV, maxFOV, FOVChangeSpeed ) {
+        if (this.startDash) {
+
+            this.dashDirection.copy( this.lookDirection );
+            this.dash = true;
+            this.startDash = false;
+
+            this.dashTimer = new THREE.Clock( true );       // clock starts as soon as dash is initiated
+
+        };
+
+        if ( this.sprint ) { this.FOVDashChangeSpeed = 0.3 }
+        else  { this.FOVDashChangeSpeed = 0.1 }
+
+        if ( this.dashTimer.elapsedTime < 0.3 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, this.FOVDashChangeSpeed ) };
+
+        this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 0.1 );
+        this.movementSpeed = this.currentDashSpeed;
+
+        this.movementDirection.copy( this.dashDirection );
+
+        if ( this.currentDashSpeed < this.walkSpeed + ((this.dashSpeed - this.walkSpeed) / 2) ) {
+            this.dash = false;
+            this.currentDashSpeed = this.dashSpeed;
+            this.movementSpeed = this.walkSpeed;
+        }
+
+    }
+
+    sprintLogic() {
 
         // set default movementSpeed and get currentFOV
         this.movementSpeed = this.walkSpeed;
-        this.currentFOV = this.camera.fov;
 
         // checks if the player was moving and has just stopped and disables sprint when stationaryIsToggle is on
         if ( this.inputDirection.length() === 0 && 
@@ -307,7 +350,7 @@ class PlayerControls {
         // reduce FOV when stationary
         if ( this.scaledMovementDirection.length() === 0 ) {
 
-            this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, minFOV, FOVChangeSpeed );
+            this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, this.FOVWalkRunChangeSpeed );
 
         }
 
@@ -317,58 +360,68 @@ class PlayerControls {
             if ( this.sprint ) {
 
                 this.movementSpeed = this.runSpeed;
-                this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, maxFOV, FOVChangeSpeed );
+                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, runFOV, this.FOVWalkRunChangeSpeed );
 
             }
             
             // decrease FOV is moving but not sprinting
             else {
 
-                this.currentFOV = THREE.MathUtils.lerp( this.currentFOV, minFOV, FOVChangeSpeed );
+                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, this.FOVWalkRunChangeSpeed );
             
             }
         }
-
-        // update camera FOV
-        this.camera.fov = this.currentFOV
-        this.camera.updateProjectionMatrix();
     }
 
     updatePlayerMotion( gameWorld ) {
-
+        
+        // get FOV
+        this.currentFOV = this.camera.fov;
+        
         // find direction camera is looking
         gameWorld.firstPersonCamera.getWorldDirection( this.lookDirection );
         this.lookDirection.y = 0;
         this.lookDirection.normalize();
-
+        
         // calculate direction of input
         this.inputDirection.x = Number( this.moveForward ) - Number( this.moveBackward );   // forward(1) / backward(-1)
         this.inputDirection.y = Number( this.moveRight )   - Number( this.moveLeft );       // right(1) / left(-1)
         this.inputDirection.normalize(); 
-
+        
         // calculate forward and right vectors
         this.forwardVector = this.lookDirection;
         this.rightVector.crossVectors( this.forwardVector, new THREE.Vector3( 0, 1, 0 ) );
-
+        
+        
         // handle sprinting logic
-        this.sprintLogic( walkFOV, runFOV, this.FOVChangeSpeed );
-
+        this.sprintLogic();
+        
         // calculate movementDirection
         this.movementDirection.set(0, 0, 0);
         this.movementDirection.addScaledVector( this.forwardVector, this.inputDirection.x );
         this.movementDirection.addScaledVector( this.rightVector, this.inputDirection.y );
         this.movementDirection.normalize();
+        
+        if ( this.startDash || this.dash ) { 
+            this.dashLogic() };
+        
 
-
+        
         // scale movement according to movement speed
         this.scaledMovementDirection.copy( this.movementDirection ).multiplyScalar( this.movementSpeed );
         this.tmpScaledMovementDirection.setValue( this.scaledMovementDirection.x, 
-                                                  this.scaledMovementDirection.y, 
-                                                  this.scaledMovementDirection.z
-                                                );
+            this.scaledMovementDirection.y, 
+            this.scaledMovementDirection.z
+        );
 
+        
         // move player according to movement direction
         this.movementController.setWalkDirection( this.tmpScaledMovementDirection );
+        
+
+        // update camera FOV
+        this.camera.fov = this.currentFOV
+        this.camera.updateProjectionMatrix();
 
         // update player mesh position according to physics simulation
         this.ghostLocation = this.player.ghostObject.getWorldTransform().getOrigin();
@@ -382,6 +435,15 @@ class PlayerControls {
                                                   this.ghostLocation.y() + (this.player.playerHeight / 2),
                                                   this.ghostLocation.z()
                                                 );
+
+        gameWorld.thirdPersonCamera.position.set( this.ghostLocation.x(),
+                                                  this.ghostLocation.y() + (this.player.playerHeight / 2),
+                                                  gameWorld.thirdPersonCameraDistanceFromScene
+                                                );
+        gameWorld.thirdPersonCamera.lookAt( this.ghostLocation.x(),
+                                            this.ghostLocation.y() + (this.player.playerHeight / 2) - 0.1,
+                                            0
+                                          );
         
         // check if player is on ground to allow jumping
         this.canJump = ( this.movementController.onGround() );  

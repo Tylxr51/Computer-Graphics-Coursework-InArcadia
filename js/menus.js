@@ -167,9 +167,6 @@ export class PauseGameMenu extends Menu {
 
                 gameInProgress = true;
 
-                document.dispatchEvent( new CustomEvent( 'restart-gameloop' ))
-
-
             }, this.unpauseDelayTime );
         }
 

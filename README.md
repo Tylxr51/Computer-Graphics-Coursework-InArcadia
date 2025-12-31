@@ -10,6 +10,8 @@
 -   /examples/jsm/controls/PointerLockControls.html
 -   https://discourse.threejs.org/t/ammo-js-with-three-js/12530/47
 -   https://github.com/bulletphysics/bullet3/blob/39b8de74df93721add193e5b3d9ebee579faebf8/docs/Bullet_User_Manual.pdf
+-   https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+-   https://threejs.org/docs/#Material.transparent
 
 
 #### Youtube

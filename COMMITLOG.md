@@ -1,5 +1,13 @@
 # Commit Log
 
+#### 31.12.25
+
+(gonna try and make commits smaller from now on, 29.12.25 was way too big)
+- Third person camera follows player
+- Added dash mechanic
+- Made a FloorPiece class that can easily create floor pieces for level design
+
+
 #### 29.12.25
 
 - Made a menu system where I moved the in-game menus to and added a main menu with settings and a level select
