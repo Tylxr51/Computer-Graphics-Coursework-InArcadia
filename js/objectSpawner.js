@@ -56,10 +56,55 @@ export class RigidBody {
 //      [ 4, -3, -1 ]
 //      [ 4, -3,  1 ]
 
+export class Staircase {
+
+    constructor( gameWorld, startingPosition, numberOfSteps, stairDepth, stairWidth ) {
+
+        this.gameWorld = gameWorld;
+
+        this.stepsArray = [];
+
+        this.numberOfSteps = numberOfSteps;
+        this.startingPosition = startingPosition;
+        this.stairDepth = stairDepth;
+        this.stairWidth = stairWidth;
+        this.stairHeight = 0.15;
+
+        this.tempFloorPiece;
+
+        this.createStaircase();
+
+    }
+
+    createStaircase() {
+
+        this.depthIncrement = 0;
+        this.heightIncrement = 0;
+
+        for ( let i = 0; i < this.numberOfSteps; ++i ) {
+            this.tempFloorPiece = new FloorPiece( this.gameWorld, 
+                                                  [ this.startingPosition[0] + this.depthIncrement, 
+                                                    this.startingPosition[1] + this.heightIncrement, 
+                                                    this.startingPosition[2] ],
+                                                  [ this.stairDepth, 
+                                                    this.stairHeight, 
+                                                    this.stairWidth ]
+                                                );
+
+            this.stepsArray.push( this.tempFloorPiece );
+
+            this.depthIncrement += this.stairDepth;
+            this.heightIncrement += this.stairHeight;
+            
+        }
+
+    }
+
+}
+
 export class FloorPiece {
     
-    
-    constructor( gameWorld, position, size) {
+    constructor( gameWorld, position, size ) {
         
         this.gameWorld = gameWorld;
 

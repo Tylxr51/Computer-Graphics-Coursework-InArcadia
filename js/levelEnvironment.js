@@ -2,7 +2,7 @@ import * as THREE from '/three.js-r170/build/three.module.js';
 import World from '/js/buildWorld.js'
 import Player from '/js/player.js'
 import OverheadLights from '/js/lighting.js';  
-import { RigidBody, FloorPiece } from '/js/objectSpawner.js'
+import { RigidBody, FloorPiece, Staircase } from '/js/objectSpawner.js'
 import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu } from '/js/menus.js'
 
 
@@ -99,6 +99,7 @@ export default class level {
 
     }
 
+    // function that chooses which level to load
     chooseLevelScene( levelIndex ) {
 
         switch ( levelIndex ) {
@@ -118,21 +119,216 @@ export default class level {
         }
     }
 
+    // function that creates level 0 scene objects
     createSceneLevel0() {
 
-        // PLAN
-        // 
-        // GENERAL AMBIENT LIGHTING
-        // CREATE TRACK
-        // SCREEN LIGHT IN DISTANCE
-        // IMPROVE LIGHTING
+        this.trackWidth = 2.00;     // width of floorpieces
 
-        this.floor1 = new FloorPiece( this.gameWorld, [ -2.0,  0, 0 ], [ 10.0, 1, 2 ]);
-        this.floor2 = new FloorPiece( this.gameWorld, [  8.0,  1, 0 ], [ 7.0,  1, 2 ]);
-        this.floor3 = new FloorPiece( this.gameWorld, [  16.0, 1, 0 ], [ 10.0, 1, 2 ]);
-        this.floor4 = new FloorPiece( this.gameWorld, [  28,   1, 0 ], [ 7.0,  1, 2 ]);
-        // const floor2 = new FloorPiece( this.gameWorld, [ 10, 1.5, 3 ], [ 14, 0.25, 0 ], [ 0, 0, 0, 1 ]);
-        // const floor3 = new FloorPiece( this.gameWorld, [ 10, 1.5, 3 ], [ 14, 0.25, 0 ], [ 0, 0, 0, 1 ]);
+        ///////////////////////////////////////
+        //////////// LOWER SECTION ////////////
+        ///////////////////////////////////////
+
+
+        ///// POSITION AND SIZE VARIABLES /////
+
+        this.firstFloorXStart = -2.00;
+        this.firstFloorXLength = 10.00;
+        this.lowerSectionY = 0.00;
+
+        this.walkJumpGapDistance = 1.00;
+        this.floorAfterWalkJumpXStart = this.firstFloorXStart + this.firstFloorXLength + this.walkJumpGapDistance;
+        this.floorAfterWalkJumpXLength = 7.00;
+
+
+        ///////// CREATE FLOOR PIECES /////////
+
+        // floor piece player spawns on to
+        this.firstFloor             =   new FloorPiece( this.gameWorld, 
+                                                        [ this.firstFloorXStart, this.lowerSectionY, 0 ], 
+                                                        [ this.firstFloorXLength, 1.0, this.trackWidth ]
+                                                    );
+        
+        // gap to walk jump across
+        
+        // after walk jump
+        this.floorAfterWalkJump     =   new FloorPiece( this.gameWorld, 
+                                                        [ this.floorAfterWalkJumpXStart, this.lowerSectionY, 0 ],     
+                                                        [ this.floorAfterWalkJumpXLength, 1.0, this.trackWidth ]
+                                                    );
+
+
+
+        ///////////////////////////////////////
+        //////////// UPPER SECTION ////////////
+        ///////////////////////////////////////
+
+
+        ///// POSITION AND SIZE VARIABLES /////
+
+        this.raisedFloorToClimbXStart = this.floorAfterWalkJumpXStart + this.floorAfterWalkJumpXLength
+        this.raisedFloorToClimbXLength = 10.0;
+        this.raisedFloorToClimbHeight = 1.50;
+        this.raisedSectionY = this.lowerSectionY + this.raisedFloorToClimbHeight;
+
+        this.sprintJumpGapDistance = 2.00;
+        this.floorAfterSprintJumpXStart = this.raisedFloorToClimbXStart + this.raisedFloorToClimbXLength + this.sprintJumpGapDistance;
+        this.floorAfterSprintJumpXLength = 7.00;
+
+
+        ///////// CREATE FLOOR PIECES /////////
+
+        // climb up to
+        this.raisedFloorToClimb     =   new FloorPiece( this.gameWorld, 
+                                                        [ this.raisedFloorToClimbXStart, this.raisedSectionY, 0 ], 
+                                                        [ this.raisedFloorToClimbXLength, this.raisedSectionY, this.trackWidth ]
+                                                      );
+
+        // gap to sprint jump across
+
+        // after sprint jump
+        this.floorAfterSprintJump   =   new FloorPiece( this.gameWorld, 
+                                                        [ this.floorAfterSprintJumpXStart, this.raisedSectionY, 0 ], 
+                                                        [ this.floorAfterSprintJumpXLength, 1.0, this.trackWidth ]
+                                                      );
+
+
+
+        //////////////////////////////////////
+        //////////// DASH SECTION ////////////
+        //////////////////////////////////////
+
+
+        ///// POSITION AND SIZE VARIABLES ////
+
+        this.dashGapDistance = 7.00;
+        this.dashGapDrop = 9.50;                // from raisedSectionY to floorBelowDashEntryY
+
+        this.dashGapOpeningXStart = this.floorAfterSprintJumpXStart + this.floorAfterSprintJumpXLength + this.dashGapDistance;
+
+        this.wallAboveDashEntryRaisedBy = 2.50;
+        this.wallAboveDashEntryY = this.raisedSectionY + this.wallAboveDashEntryRaisedBy;
+        this.dashGapOpeningHeight = 2.00;
+        this.wallAboveDashEntryHeight = this.dashGapDrop - this.dashGapOpeningHeight + this.wallAboveDashEntryRaisedBy;
+
+        this.floorBelowDashEntryY = this.raisedSectionY - this.dashGapDrop;
+        this.floorBelowDashEntryXLength = 4.00;
+
+
+        ///////// CREATE FLOOR PIECES /////////
+
+        // big gap to dash across
+
+        // dash entry
+        this.wallAboveDashEntry     =   new FloorPiece( this.gameWorld, 
+                                                        [ this.dashGapOpeningXStart, this.wallAboveDashEntryY, 0 ], 
+                                                        [ 2.0, this.wallAboveDashEntryHeight, this.trackWidth ]
+                                                    );
+        this.floorBelowDashEntry    =   new FloorPiece( this.gameWorld, 
+                                                        [ this.dashGapOpeningXStart, this.floorBelowDashEntryY, 0 ], 
+                                                        [ this.floorBelowDashEntryXLength, 1.0, this.trackWidth ]
+                                                    );
+
+
+
+        ///////////////////////////////////////
+        ////////// STAIRCASE SECTION //////////
+        ///////////////////////////////////////
+
+        ///// POSITION AND SIZE VARIABLES /////
+
+        this.staircaseFromDashToTubesXStart = this.dashGapOpeningXStart + this.floorBelowDashEntryXLength;
+        this.staircaseFromDashToTubesHeight = 3.00;         // must be a multiple of 0.15!! (step height as defined in class)
+        this.staircaseFromDashToTubesNumberOfSteps = this.staircaseFromDashToTubesHeight / 0.15
+        this.staircaseFromDashToTubesStepDepth = 0.5;
+        this.staircaseFromDashToTubesXLength = this.staircaseFromDashToTubesStepDepth * this.staircaseFromDashToTubesNumberOfSteps;
+
+
+        ///////// CREATE FLOOR PIECES //////////
+
+        // staircase after dash up to tubes
+        this.staircaseFromDashToTubes   =   new Staircase ( this.gameWorld, 
+                                                            [ this.staircaseFromDashToTubesXStart, this.floorBelowDashEntryY,  0 ], 
+                                                            this.staircaseFromDashToTubesNumberOfSteps, 
+                                                            this.staircaseFromDashToTubesStepDepth, 
+                                                            this.trackWidth 
+                                                          );
+
+
+        ////////////////////////////////////////
+        ///////////// TUBE SECTION /////////////
+        ////////////////////////////////////////
+
+        ///// POSITION AND SIZE VARIABLES /////
+
+        this.tubeSectionXStart = this.staircaseFromDashToTubesXStart + this.staircaseFromDashToTubesXLength;
+        this.tubeSectionXLength = 10.00;
+
+        this.tubeDropLength = 8.00;       // length from floor
+        this.tubeWallHeight = 0.50;
+        this.tubeWallThickness = 0.10;
+        this.tubeXLength = this.tubeSectionXLength / 4;
+        this.tubeZLength = this.trackWidth / 2;
+
+        this.tubeSectionFloorHeight = this.floorBelowDashEntryY + this.staircaseFromDashToTubesHeight;
+        this.tubeSectionFloorThickness = 2.0;
+
+        this.rightFloorBeforeFirstTubeXLength = this.tubeSectionXLength / 4;
+        this.rightFloorBetweenTubesXLength = this.tubeSectionXLength / 8;
+        this.rightFloorAfterSecondTubeXLength = this.tubeSectionXLength / 8;
+
+        this.rightFloorBetweenTubesXStart = this.tubeSectionXStart + 4 * (this.tubeSectionXLength / 8)
+        this.rightFloorAfterSecondTubeXStart = this.tubeSectionXStart + 7 * (this.tubeSectionXLength / 8)
+
+
+        ///////// CREATE FLOOR PIECES //////////
+
+        // floor sections
+        this.leftFloorNextToTubes       =   new FloorPiece( this.gameWorld, 
+                                                            [  this.tubeSectionXStart, this.tubeSectionFloorHeight, -this.tubeZLength ], 
+                                                            [  this.tubeSectionXLength,  this.tubeSectionFloorThickness, this.tubeZLength ]);
+        this.rightFloorBeforeFirstTube  =   new FloorPiece( this.gameWorld, 
+                                                            [  this.tubeSectionXStart, this.tubeSectionFloorHeight,  this.tubeZLength ], 
+                                                            [  this.rightFloorBeforeFirstTubeXLength,  this.tubeSectionFloorThickness, this.tubeZLength ]);
+        this.rightFloorBetweenTubes     =   new FloorPiece( this.gameWorld, 
+                                                            [  this.rightFloorBetweenTubesXStart, this.tubeSectionFloorHeight,  this.tubeZLength ], 
+                                                            [  this.rightFloorBetweenTubesXLength,  this.tubeSectionFloorThickness, this.tubeZLength ]);
+        this.rightFloorAfterSecondTube  =   new FloorPiece( this.gameWorld, 
+                                                            [  this.rightFloorAfterSecondTubeXStart, this.tubeSectionFloorHeight,  this.tubeZLength ], 
+                                                            [  this.rightFloorAfterSecondTubeXLength,  this.tubeSectionFloorThickness, this.tubeZLength ]);
+
+        // tubes
+        this.frontWallForFirstTube      =   new FloorPiece( this.gameWorld, 
+                                                            [ this.tubeSectionXStart + this.rightFloorBeforeFirstTubeXLength - this.tubeWallThickness, this.tubeSectionFloorHeight + this.tubeWallHeight, this.tubeZLength ], 
+                                                            [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeZLength ]
+                                                          );
+        this.rightWallForFirstTube      =   new FloorPiece( this.gameWorld, 
+                                                            [ this.tubeSectionXStart + this.rightFloorBeforeFirstTubeXLength, this.tubeSectionFloorHeight + this.tubeWallHeight, this.trackWidth - ( this.tubeWallThickness / 2 ) ], 
+                                                            [ this.tubeXLength, this.tubeDropLength + this.tubeWallHeight, ( this.tubeWallThickness / 2 ) ]
+                                                          );
+        this.leftWallForFirstTube       =   new FloorPiece( this.gameWorld, 
+                                                            [ this.tubeSectionXStart + this.rightFloorBeforeFirstTubeXLength, this.tubeSectionFloorHeight - this.tubeSectionFloorThickness, - ( this.tubeWallThickness / 2 ) ], 
+                                                            [ this.tubeXLength, this.tubeDropLength - this.tubeSectionFloorThickness, ( this.tubeWallThickness / 2 ) ]
+                                                          );
+        this.backWallForFirstTube       =   new FloorPiece( this.gameWorld, 
+                                                            [ this.rightFloorBetweenTubesXStart, this.tubeSectionFloorHeight + this.tubeWallHeight, this.tubeZLength ], 
+                                                            [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeZLength ]
+                                                          );
+        this.frontWallForSecondTube     =   new FloorPiece( this.gameWorld, 
+                                                            [ this.rightFloorBetweenTubesXStart + this.rightFloorBetweenTubesXLength - this.tubeWallThickness, this.tubeSectionFloorHeight + this.tubeWallHeight, this.tubeZLength ], 
+                                                            [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeZLength ]
+                                                          );
+        this.rightWallForSecondTube     =   new FloorPiece( this.gameWorld, 
+                                                            [ this.rightFloorBetweenTubesXStart + this.rightFloorBetweenTubesXLength, this.tubeSectionFloorHeight + this.tubeWallHeight, this.trackWidth - ( this.tubeWallThickness / 2 ) ], 
+                                                            [ this.tubeXLength, this.tubeDropLength + this.tubeWallHeight, ( this.tubeWallThickness / 2 ) ]
+                                                          );
+        this.leftWallForSecondTube      =   new FloorPiece( this.gameWorld, 
+                                                            [ this.rightFloorBetweenTubesXStart + this.rightFloorBetweenTubesXLength, this.tubeSectionFloorHeight - this.tubeSectionFloorThickness, - (this.tubeWallThickness / 2) ], 
+                                                            [ this.tubeXLength, this.tubeDropLength - this.tubeSectionFloorThickness, ( this.tubeWallThickness / 2 ) ]
+                                                          );
+        this.backWallForSecondTube      =   new FloorPiece( this.gameWorld, 
+                                                            [ this.rightFloorAfterSecondTubeXStart, this.tubeSectionFloorHeight + this.tubeWallHeight, this.tubeZLength ], 
+                                                            [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeZLength ]
+                                                          );
 
         // Set up box
         // const boxGeometry = new THREE.BoxGeometry();
@@ -155,18 +351,31 @@ export default class level {
         directionalLight.position.set(-1,1,0);
         this.gameWorld.scene.add(directionalLight);
 
+        const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 10);
+        directionalLight2.position.set(60,-2,1);
+        directionalLight2.target.position.set(58, -10, 0)
+
+        this.gameWorld.scene.add(directionalLight2);
+
         const dlighthelper = new THREE.DirectionalLightHelper(directionalLight);
         this.gameWorld.scene.add(dlighthelper);
 
-        const overheadLights = new OverheadLights();
-        this.gameWorld.scene.add(overheadLights.light1);
+        const dlighthelper2 = new THREE.DirectionalLightHelper(directionalLight2);
+        this.gameWorld.scene.add(dlighthelper2);
+
+        // const overheadLights = new OverheadLights();
+        // this.gameWorld.scene.add(overheadLights.light1);
+
+        // const axesHelper = new THREE.AxesHelper(30)
+        // axesHelper.position.set(0, 5, 0);
+        // this.gameWorld.scene.add(axesHelper);
 
     }
 
+    // function that creates level 1 scene objects
     createSceneLevel1() {
         
     }
-
 
     // function for key down events related to key commands 
     keyCommands = ( event ) => {
@@ -227,7 +436,6 @@ export default class level {
 
     }
 
-
     // function to set current camera to first person
     useFirstPersonCamera() {
 
@@ -265,7 +473,6 @@ export default class level {
                 break;
         }
     }
-
 
     // game loop
     gameloop() {

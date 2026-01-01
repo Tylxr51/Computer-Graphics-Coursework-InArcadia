@@ -189,20 +189,14 @@ export class DeadGameMenu extends Menu {
         // get menu screen, back button function, and show/hide functions
         super( menuHTMLName );
 
-        this.unpauseDelayTime = 1200;       // delay when trying to unlock for browser security error
-
-        // define menu click function
+        // define menu click function (no timer needed as controls unlocked by game not user)
         this.onDeadGameMenuClick = () => {
 
-            // timer delay to prevent immediate relocking error: MAYBE MAKE BETTER LATER
-            setTimeout( () => {
+            this.hideMenu();                                // hide dead menu
+            player.playerControls.turnOnMovement();         // enable player movement
+            player.playerControls.cameraController.lock();  // lock user cursor
+            player.spawnPlayer(isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion);     // spawn player
 
-                this.hideMenu();                                // hide dead menu
-                player.playerControls.turnOnMovement();         // enable player movement
-                player.playerControls.cameraController.lock();  // lock user cursor
-                player.spawnPlayer(isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion);     // spawn player
-
-            }, this.unpauseDelayTime );
         }
 
         // make listeners for menu button click

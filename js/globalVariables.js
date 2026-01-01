@@ -1,6 +1,6 @@
 //////////// VARIABLES TO BE ACCESSED BY ALL FILES ////////////
 
-let debug = false;               // set true for debug mode
+let debug = true;               // set true for debug mode
 
 let gameInProgress;
 let stopGameloop;

@@ -153,6 +153,7 @@ class PlayerControls {
         this.sprint = false;
         this.dash = false;
 
+        // set fov variables
         this.currentFOV;
         this.FOVWalkRunChangeSpeed = 0.3;      // how quickly FOV changes when player starts/stops sprinting
         this.FOVDashChangeSpeed = 0.1;
@@ -178,9 +179,6 @@ class PlayerControls {
         this.movementDirection          = new THREE.Vector3(  0, 0, 0 );
         this.scaledMovementDirection    = new THREE.Vector3(  0, 0, 0 );
         this.tmpScaledMovementDirection = new Ammo.btVector3( 0, 0, 0 );
-
-        this.testerVector = new THREE.Vector3(  1, 2, 3 );
-
 
     }
 
@@ -224,9 +222,14 @@ class PlayerControls {
             // jump
             case 'Space':
 
-                 if ( this.canJump === true ) { this.movementController.jump(); }
+                 if ( this.canJump === true ) { 
+                    
+                    this.movementController.jump(); 
 
-                 this.canJump = false;
+                    this.canJump = false;
+                
+                }
+
 
                  break;
 
@@ -402,8 +405,7 @@ class PlayerControls {
         this.movementDirection.addScaledVector( this.rightVector, this.inputDirection.y );
         this.movementDirection.normalize();
         
-        if ( this.startDash || this.dash ) { 
-            this.dashLogic() };
+        if ( this.startDash || this.dash ) { this.dashLogic() };
         
 
         

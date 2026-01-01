@@ -1,5 +1,14 @@
 # Commit Log
 
+
+#### 01.01.26
+
+- Created a basic track for level 0 using FloorPiece objects
+- Created a staircase class
+- Tried to make level 0 object creation as clear and easy to read as possible
+- Got rid of timer delay for respawn (wasn't needed)
+- Tried to add double jump but would have been too complicated and isn't necessary
+
 #### 31.12.25
 
 (gonna try and make commits smaller from now on, 29.12.25 was way too big)
