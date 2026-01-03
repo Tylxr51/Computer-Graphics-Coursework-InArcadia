@@ -1,4 +1,6 @@
-import * as THREE from '/three.js-r170/build/three.module.js';
+import * as THREE from 'three';
+import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
 export class RigidBody {
     constructor() {
@@ -30,6 +32,115 @@ export class RigidBody {
         Ammo.destroy( btSize );
     }
 }
+
+function initRectAreaLight() {
+
+    if (!isRectAreaLightUniformLibInit) { 
+            
+            RectAreaLightUniformsLib.init();
+
+            isRectAreaLightUniformLibInit = true;
+        
+        };
+
+}
+
+export class Screen {
+
+    constructor( gameWorld ) {
+
+        // initRectAreaLight();
+
+        // this.gameWorld = gameWorld;
+        // this.screenPosition = (30, 10, 100);
+        // this.screenWidth = 160;
+        // this.screenHeight = 90;
+
+        // this.screenLight = new THREE.RectAreaLight( 0xffffff, 2, this.screenWidth, this.screenHeight );
+        // this.screenLight.quaternion.set( 0, 0, 0, 1 );    // rotate to face +x direction
+        // this.screenLight.position.set( 30, 10, 200 );
+        // this.screenBody = new RectAreaLightHelper( this.screenLight );
+
+        // this.gameWorld.scene.add( this.screenLight );
+        // this.gameWorld.scene.add( this.screenBody );
+
+        this.gameWorld = gameWorld
+
+        this.screenTexture = new THREE.TextureLoader().load('./assets/screenTexture.png')
+
+        this.screenWidth = 144.0;
+        this.screenHeight = 90.0;
+        this.screenGeometry = new THREE.PlaneGeometry( this.screenWidth, this.screenHeight, 100, 100 );
+        this.screenMaterial = new THREE.ShaderMaterial( 
+            { vertexShader: screenVertexShader, 
+              fragmentShader: screenFragmentShader, 
+              transparent : true, 
+              uniforms : { shapeWidth : { value : this.screenWidth },
+                           shapeHeight : { value : this.screenHeight },
+                           uTime : { value : 0 },
+                           uColor : { value : new THREE.Color( 0xffffff ) },
+                           uScreen : { value : this.screenTexture },
+                           isFlickerOn : {value : Number( isFlickerOn ) }
+                         }
+            } 
+        );
+
+        this.screenMesh = new THREE.Mesh(this.screenGeometry, this.screenMaterial);
+        this.gameWorld.scene.add(this.screenMesh)
+
+        // set position and rotation
+        this.screenMesh.position.set(30, 40, 100)                         // far away in +z direction
+        this.screenMesh.quaternion.set(0, 0.9805807, -0.1961161, 0)       // facing track and tilted down a bit
+
+    }
+
+    updateScanlines( delta ) {
+        this.screenMaterial.uniforms.uTime.value += delta
+    }
+}
+
+export class SpawnArea {
+    
+    constructor( gameWorld, spawnPlatformXStart, playerSpawnY, playerHeight, trackZCentre ) {
+        
+        initRectAreaLight();
+
+        this.gameWorld = gameWorld;
+        this.platformXStart = spawnPlatformXStart;
+        this.platformXLength = 1.50;
+        this.platformY = playerSpawnY - playerHeight;
+        this.doorXStart = this.platformXStart + 0.01      // looks better if it is moved slightly forward
+        this.doorWidth = 0.75;
+        this.doorHeight = 1.4;
+        this.trackZCentre = trackZCentre;
+
+        this.makeDoor();
+        this.makePlatform();
+
+    }
+
+    makeDoor() {
+
+        this.doorLight = new THREE.RectAreaLight( 0xffffff, 2, this.doorWidth, this.doorHeight );
+        this.doorLight.quaternion.set(0, 1/Math.sqrt(2), 0, -1/Math.sqrt(2))    // rotate to face +x direction
+        this.doorLight.position.set( this.doorXStart, this.platformY + ( this.doorHeight / 2 ), this.trackZCentre );
+        this.doorBody = new RectAreaLightHelper( this.doorLight )
+
+
+        this.gameWorld.scene.add( this.doorLight );
+        this.gameWorld.scene.add( this.doorBody );
+
+
+    }
+
+    makePlatform() {
+        this.platform   =   new FloorPiece( this.gameWorld, 
+                                            [ this.platformXStart, this.platformY, this.trackZCentre ], 
+                                            [ this.platformXLength, 0.5, ( this.doorWidth / 2 ) ]
+                                          );
+    }
+}
+
 
 // WHAT THIS CLASS DOES AND WHY:
 //
@@ -158,7 +269,9 @@ export class FloorPiece {
                                                     this.floorSize.y, 
                                                     this.floorSize.z 
                                                   );
-        this.floorMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+                                                  
+        // this.floorMaterial = new THREE.ShaderMaterial( { vertexShader, fragmentShader } );
+        this.floorMaterial = new THREE.MeshStandardMaterial({ color: 0xbcbcbc, roughness: 0.1, metalness: 0.1 } );
         this.floorMesh = new THREE.Mesh( this.floorGeometry, this.floorMaterial );
 
 

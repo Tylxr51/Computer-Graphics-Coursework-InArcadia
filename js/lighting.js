@@ -1,4 +1,4 @@
-import * as THREE from '/three.js-r170/build/three.module.js';
+import * as THREE from 'three';
 
 export default class OverheadLights {
     constructor() {

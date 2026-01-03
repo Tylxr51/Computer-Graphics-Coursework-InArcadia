@@ -1,4 +1,4 @@
-import * as THREE from '/three.js-r170/build/three.module.js';
+import * as THREE from 'three';
 
 
 export default class World {
@@ -7,9 +7,14 @@ export default class World {
 
         // scene and renderer setup
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer();
+        this.scene.background = new THREE.Color( 0x222222 );
+		this.scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
+
+        this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setPixelRatio( window.devicePixelRatio );
         document.body.appendChild( this.renderer.domElement );              // add canvas to document body
+
 
 
         // first person camera setup
@@ -45,7 +50,7 @@ export default class World {
         this.thirdPersonCameraBottom;
         this.thirdPersonCameraNear = 0.1;
         this.thirdPersonCameraFar = 1000;
-        this.thirdPersonCameraZoom = 0.01;
+        this.thirdPersonCameraZoomOut = 0.015;
         this.thirdPersonCameraDistanceFromScene = 10;
         this.thirdPersonCamera = new THREE.OrthographicCamera( this.thirdPersonCameraLeft,
                                                                this.thirdPersonCameraRight,
@@ -83,10 +88,10 @@ export default class World {
         this.firstPersonCamera.aspect = window.innerWidth / window.innerHeight;
 
         // set third person camera aspect ratio
-        this.thirdPersonCamera.left     = - this.thirdPersonCameraZoom * window.innerWidth  / 2;
-        this.thirdPersonCamera.right    =   this.thirdPersonCameraZoom * window.innerWidth  / 2;
-        this.thirdPersonCamera.top      =   this.thirdPersonCameraZoom * window.innerHeight / 2;
-        this.thirdPersonCamera.bottom   = - this.thirdPersonCameraZoom * window.innerHeight / 2;
+        this.thirdPersonCamera.left     = - this.thirdPersonCameraZoomOut * window.innerWidth  / 2;
+        this.thirdPersonCamera.right    =   this.thirdPersonCameraZoomOut * window.innerWidth  / 2;
+        this.thirdPersonCamera.top      =   this.thirdPersonCameraZoomOut * window.innerHeight / 2;
+        this.thirdPersonCamera.bottom   = - this.thirdPersonCameraZoomOut * window.innerHeight / 2;
 
         // update cameras        
         this.firstPersonCamera.updateProjectionMatrix();

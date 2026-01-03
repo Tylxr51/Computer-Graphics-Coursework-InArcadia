@@ -1,9 +1,10 @@
-import * as THREE from '/three.js-r170/build/three.module.js';
+import * as THREE from 'three';
 import World from '/js/buildWorld.js'
 import Player from '/js/player.js'
 import OverheadLights from '/js/lighting.js';  
-import { RigidBody, FloorPiece, Staircase } from '/js/objectSpawner.js'
+import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen } from '/js/objectSpawner.js'
 import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu } from '/js/menus.js'
+
 
 
 export default class level {
@@ -47,7 +48,8 @@ export default class level {
         this.gameWorld.initPhysics();
 
         // initialise player 
-        this.ammoPlayerSpawnPosition = new Ammo.btVector3( 0, 5, 0 )
+        this.playerSpawnY = 15.5
+        this.ammoPlayerSpawnPosition = new Ammo.btVector3( 0, this.playerSpawnY, 0 )
         this.ammoPlayerSpawnQuaternion = new Ammo.btQuaternion( 0, 0, 0, 1 );
         this.cameraSpawnLookAt = new THREE.Vector3( 1000, 0, 0 )        // set to very far in distance so no glitching during player respawn teleport
         this.playerSize = new THREE.Vector2( 0.25, 0.5 );               // radius, height
@@ -123,6 +125,31 @@ export default class level {
     createSceneLevel0() {
 
         this.trackWidth = 2.00;     // width of floorpieces
+        this.trackZCentre = 0.00;
+
+        //////////////////////////////////////
+        /////////////// SCREEN ///////////////
+        //////////////////////////////////////
+
+        this.screen = new Screen( this.gameWorld )
+
+        
+        //////////////////////////////////////
+        /////////// SPAWN PLATFORM ///////////
+        //////////////////////////////////////
+
+        ///// POSITION AND SIZE VARIABLES /////
+
+        this.spawnPlatformXStart = -0.50;
+        
+        
+        ///// CREATE FLOOR PIECES & DOOR //////
+        
+        // create spawn door and spawn platform
+        this.spawnArea = new SpawnArea( this.gameWorld, this.spawnPlatformXStart, this.playerSpawnY, this.playerSize.y, this.trackZCentre )
+        
+        
+        
 
         ///////////////////////////////////////
         //////////// LOWER SECTION ////////////
@@ -131,7 +158,7 @@ export default class level {
 
         ///// POSITION AND SIZE VARIABLES /////
 
-        this.firstFloorXStart = -2.00;
+        this.firstFloorXStart = -0.50;
         this.firstFloorXLength = 10.00;
         this.lowerSectionY = 0.00;
 
@@ -142,7 +169,9 @@ export default class level {
 
         ///////// CREATE FLOOR PIECES /////////
 
-        // floor piece player spawns on to
+        // player drops from spawn area
+
+        // floor piece player lands on to
         this.firstFloor             =   new FloorPiece( this.gameWorld, 
                                                         [ this.firstFloorXStart, this.lowerSectionY, 0 ], 
                                                         [ this.firstFloorXLength, 1.0, this.trackWidth ]
@@ -348,20 +377,21 @@ export default class level {
 
         // Set up lighting
         const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
-        directionalLight.position.set(-1,1,0);
+        directionalLight.position.set(0,15,0);
+        directionalLight.target.position.set(0,15,20)
         this.gameWorld.scene.add(directionalLight);
 
-        const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 10);
-        directionalLight2.position.set(60,-2,1);
-        directionalLight2.target.position.set(58, -10, 0)
+        // const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 10);
+        // directionalLight2.position.set(60,-2,1);
+        // directionalLight2.target.position.set(58, -10, 0)
 
-        this.gameWorld.scene.add(directionalLight2);
+        // this.gameWorld.scene.add(directionalLight2);
 
         const dlighthelper = new THREE.DirectionalLightHelper(directionalLight);
         this.gameWorld.scene.add(dlighthelper);
 
-        const dlighthelper2 = new THREE.DirectionalLightHelper(directionalLight2);
-        this.gameWorld.scene.add(dlighthelper2);
+        // const dlighthelper2 = new THREE.DirectionalLightHelper(directionalLight2);
+        // this.gameWorld.scene.add(dlighthelper2);
 
         // const overheadLights = new OverheadLights();
         // this.gameWorld.scene.add(overheadLights.light1);
@@ -481,10 +511,12 @@ export default class level {
 
         requestAnimationFrame( this.gameloop );                     //  schedule next frame if game is still in progress
 
-        this.delta = this.clock.getDelta();                        //  update delta
+        this.delta = this.clock.getDelta();                         //  update delta
 
         // only update scene if game is in progress 
         if ( gameInProgress ) {
+
+            this.screen?.updateScanlines( this.delta );                 // update scanline animation if screen exists
 
             this.gameWorld.physicsWorld.stepSimulation( this.delta, 10 );    //  update physics sim by delta
 

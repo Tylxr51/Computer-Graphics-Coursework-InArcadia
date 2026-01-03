@@ -1,5 +1,10 @@
 # Commit Log
 
+#### 03.01.26
+
+- Created spawn area with platform and door
+- Created screen with custom vertex and fragment shaders
+- updated in-game menus with buttons
 
 #### 01.01.26
 

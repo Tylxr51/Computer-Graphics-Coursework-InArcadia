@@ -1,10 +1,8 @@
-import * as THREE from '/three.js-r170/build/three.module.js'; 
-import OverheadLights from '/js/lighting.js';  
-import { RigidBody } from '/js/objectSpawner.js'
 import Level from '/js/levelEnvironment.js'
 import { MainMainMenu, LevelsMainMenu, SettingsMainMenu } from '/js/menus.js'
 
 
+let AmmoLib
 let mainMenu;
 let levelsMenu;
 let settingsMenu;
@@ -45,12 +43,30 @@ function exitLevel() {
 }
 
 
+async function loadShader( url ) {
+
+  const response = await fetch( url );
+
+  return await response.text();
+
+}
+
+async function loadPackages() {
+
+    [ AmmoLib, screenVertexShader, screenFragmentShader ] = await Promise.all([ Ammo(), 
+                                                                          loadShader('/shaders/screen-vertex-shader.glsl'), 
+                                                                          loadShader('/shaders/screen-fragment-shader.glsl') 
+                                                                        ]);
+    
+
+    Ammo = AmmoLib;
+    
+}
+
 // load physics engine and show main menu
 async function main() {
-
-    // load ammo
-    const AmmoLib = await Ammo();
-    Ammo = AmmoLib;
+    
+    loadPackages();
 
     document.body.style.margin = '0';       // remove borders around canvas
 
@@ -76,7 +92,7 @@ async function main() {
     stopGameloop = true;
 
     mainMenu.showMenu();                // show main menu
-
+    
 }
 
 // Load and launch into main menu

@@ -1,5 +1,5 @@
-import * as THREE from '/three.js-r170/build/three.module.js';
-import { PointerLockControls } from '/three.js-r170/examples/jsm/controls/PointerLockControls.js'; 
+import * as THREE from 'three';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js'; 
 
 export default class Player {
     
@@ -152,6 +152,9 @@ class PlayerControls {
         // set sprint and sprint settings variables
         this.sprint = false;
         this.dash = false;
+
+        this.dashTimer = new THREE.Clock( false );
+        this.dashTimer.elapsedTime = dashCooldown;
 
         // set fov variables
         this.currentFOV;
@@ -314,17 +317,21 @@ class PlayerControls {
             this.dash = true;
             this.startDash = false;
 
-            this.dashTimer = new THREE.Clock( true );       // clock starts as soon as dash is initiated
+            this.dashTimer.start();
 
         };
 
+        dashRechargeState = this.dashTimer.getElapsedTime();
+        
+        if ( !this.dash ) { return };
+        
         if ( this.sprint ) { this.FOVDashChangeSpeed = 0.3 }
         else  { this.FOVDashChangeSpeed = 0.1 }
+        
+        if ( this.dashTimer.getElapsedTime() < 0.07 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, this.FOVDashChangeSpeed ) };
 
-        if ( this.dashTimer.elapsedTime < 0.3 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, this.FOVDashChangeSpeed ) };
-
-        this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 0.1 );
         this.movementSpeed = this.currentDashSpeed;
+        this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 0.1 );
 
         this.movementDirection.copy( this.dashDirection );
 
@@ -333,6 +340,7 @@ class PlayerControls {
             this.currentDashSpeed = this.dashSpeed;
             this.movementSpeed = this.walkSpeed;
         }
+        
 
     }
 
@@ -405,7 +413,7 @@ class PlayerControls {
         this.movementDirection.addScaledVector( this.rightVector, this.inputDirection.y );
         this.movementDirection.normalize();
         
-        if ( this.startDash || this.dash ) { this.dashLogic() };
+        this.dashLogic();
         
 
         
@@ -439,11 +447,11 @@ class PlayerControls {
                                                 );
 
         gameWorld.thirdPersonCamera.position.set( this.ghostLocation.x(),
-                                                  this.ghostLocation.y() + (this.player.playerHeight / 2),
+                                                  THREE.MathUtils.clamp( this.ghostLocation.y() + 0.5, -10, 5),
                                                   gameWorld.thirdPersonCameraDistanceFromScene
                                                 );
         gameWorld.thirdPersonCamera.lookAt( this.ghostLocation.x(),
-                                            this.ghostLocation.y() + (this.player.playerHeight / 2) - 0.1,
+                                            gameWorld.thirdPersonCamera.position.y - 0.1,
                                             0
                                           );
         

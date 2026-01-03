@@ -16,6 +16,10 @@ class Menu {
         this.menu.style.display = 'none';      //  hide menu
     }
 
+    exitLevel() {
+        document.dispatchEvent( new CustomEvent( 'exit-level' ) );      // send signal to end level to level manager
+    }
+
 }
 
 
@@ -84,6 +88,7 @@ export class SettingsMainMenu extends Menu {
         // get menu button locations
         this.toggleSprintButton = document.getElementById( 'toggle-sprint-button' );
         this.stationaryIsToggleButton = document.getElementById( 'stationary-is-toggle-button' );
+        this.isFlickerOnButton = document.getElementById( 'is-flicker-on-button' );
         this.backButton = document.getElementById( 'settings-back-button' );
 
         // define button click functions
@@ -103,9 +108,18 @@ export class SettingsMainMenu extends Menu {
 
         }
 
+        this.isFlickerOnButtonClick = () => {
+
+            isFlickerOn = !isFlickerOn;
+            this.HTMLIsFlickerOnVariableLocation = document.getElementById( 'is-flicker-on-value' );
+            writeVariable( this.HTMLIsFlickerOnVariableLocation, isFlickerOn )
+
+        }
+
         // make listeners for button clicks
         this.toggleSprintButton.addEventListener( 'click', this.onToggleSprintButtonClick );
         this.stationaryIsToggleButton.addEventListener( 'click', this.onStationaryIsToggleButtonClick );
+        this.isFlickerOnButton.addEventListener( 'click', this.isFlickerOnButtonClick );
         this.backButton.addEventListener( 'click', this.onBackClick );
 
     }
@@ -151,13 +165,22 @@ export class PauseGameMenu extends Menu {
         
         this.unpauseDelayTime = 1200;       // delay when trying to unlock for browser security error
 
-        // define menu click function
-        this.onPauseGameMenuClick = () => {
+        this.HTMLResumeStatusLocation = document.getElementById( 'resume-status' );
 
-            // timer delay to prevent immediate relocking error: MAYBE MAKE BETTER LATER
+
+        // define menu click function
+        this.onResumeButtonClick = () => {
+            
+            // display 'Resuming...' below button so user know the button has been pressed
+            writeVariable( this.HTMLResumeStatusLocation, 'Resuming...' );
+
+            // timer delay to prevent immediate relocking error
             setTimeout( () => {
 
                 this.hideMenu();            // hide pause menu
+
+                // get rid of 'Resuming...' for next time menu is opened
+                writeVariable( this.HTMLResumeStatusLocation, '' );
 
                 if (this.currentCameraIndex === this.firstPersonCameraIndex){ 
                     player.playerControls.turnOnMovement();      //  only enable player movement if using first person camera
@@ -170,8 +193,14 @@ export class PauseGameMenu extends Menu {
             }, this.unpauseDelayTime );
         }
 
-        // make listeners for menu button click
-        this.menu.addEventListener( 'click', this.onPauseGameMenuClick, { signal: abortController.signal });
+        this.onExitGamePausedButtonClick = () => { this.exitLevel() }
+
+        // make listeners for button clicks
+        this.resumeButton = document.getElementById( 'resume-button' );
+        this.exitGameButton = document.getElementById( 'exit-game-paused-button' );
+
+        this.resumeButton.addEventListener('click', this.onResumeButtonClick, { signal: abortController.signal } );
+        this.exitGameButton.addEventListener('click', this.onExitGamePausedButtonClick, { signal: abortController.signal } );
         
     }
 
@@ -190,7 +219,7 @@ export class DeadGameMenu extends Menu {
         super( menuHTMLName );
 
         // define menu click function (no timer needed as controls unlocked by game not user)
-        this.onDeadGameMenuClick = () => {
+        this.onRespawnButtonClick = () => {
 
             this.hideMenu();                                // hide dead menu
             player.playerControls.turnOnMovement();         // enable player movement
@@ -199,7 +228,13 @@ export class DeadGameMenu extends Menu {
 
         }
 
-        // make listeners for menu button click
-        this.menu.addEventListener( 'click', this.onDeadGameMenuClick, { signal: abortController.signal } );
+        this.onExitGameDeadButtonClick = () => { this.exitLevel() }
+
+
+        this.resumeButton = document.getElementById( 'respawn-button' );
+        this.exitGameButton = document.getElementById( 'exit-game-dead-button' );
+
+        this.resumeButton.addEventListener('click', this.onRespawnButtonClick, { signal: abortController.signal } );
+        this.exitGameButton.addEventListener('click', this.onExitGameDeadButtonClick, { signal: abortController.signal } );
     }
 }
