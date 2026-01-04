@@ -1,6 +1,6 @@
 # To-do
 
-sprint cooldown with hud
+floor that completes level when hit
 put instructions in main menu
 build level 1
 have a maze with some parkour maybe then reveal that there was a drop-down with a path leading to the end just down on the right

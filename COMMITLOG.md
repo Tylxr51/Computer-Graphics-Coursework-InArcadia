@@ -1,5 +1,12 @@
 # Commit Log
 
+#### 04.01.26
+
+- Added some color variation in FloorPieces
+- Started making scene for level1
+- Implemented a dash cooldown
+- Added a HUD with an element showing dash cooldown
+
 #### 03.01.26
 
 - Created spawn area with platform and door

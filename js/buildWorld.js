@@ -7,7 +7,7 @@ export default class World {
 
         // scene and renderer setup
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0x222222 );
+        this.scene.background = new THREE.Color( 0x000000 );
 		this.scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
 
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -50,7 +50,7 @@ export default class World {
         this.thirdPersonCameraBottom;
         this.thirdPersonCameraNear = 0.1;
         this.thirdPersonCameraFar = 1000;
-        this.thirdPersonCameraZoomOut = 0.015;
+        this.thirdPersonCameraZoomOut = 0.025;
         this.thirdPersonCameraDistanceFromScene = 10;
         this.thirdPersonCamera = new THREE.OrthographicCamera( this.thirdPersonCameraLeft,
                                                                this.thirdPersonCameraRight,

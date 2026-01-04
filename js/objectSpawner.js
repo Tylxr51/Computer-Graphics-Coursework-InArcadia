@@ -46,31 +46,23 @@ function initRectAreaLight() {
 }
 
 export class Screen {
-
+    
     constructor( gameWorld ) {
+        
+        this.gameWorld = gameWorld;
+        initRectAreaLight();
 
-        // initRectAreaLight();
-
-        // this.gameWorld = gameWorld;
-        // this.screenPosition = (30, 10, 100);
-        // this.screenWidth = 160;
-        // this.screenHeight = 90;
-
-        // this.screenLight = new THREE.RectAreaLight( 0xffffff, 2, this.screenWidth, this.screenHeight );
-        // this.screenLight.quaternion.set( 0, 0, 0, 1 );    // rotate to face +x direction
-        // this.screenLight.position.set( 30, 10, 200 );
-        // this.screenBody = new RectAreaLightHelper( this.screenLight );
-
-        // this.gameWorld.scene.add( this.screenLight );
-        // this.gameWorld.scene.add( this.screenBody );
-
-        this.gameWorld = gameWorld
-
+        // load texture to go on screen
         this.screenTexture = new THREE.TextureLoader().load('./assets/screenTexture.png')
 
+        // screen size
         this.screenWidth = 144.0;
         this.screenHeight = 90.0;
+
+        // screen geometry
         this.screenGeometry = new THREE.PlaneGeometry( this.screenWidth, this.screenHeight, 100, 100 );
+
+        // screen material with screenVertexShader and screenFragmentShader
         this.screenMaterial = new THREE.ShaderMaterial( 
             { vertexShader: screenVertexShader, 
               fragmentShader: screenFragmentShader, 
@@ -85,12 +77,28 @@ export class Screen {
             } 
         );
 
+        // screen mesh with screenGeometry and screenMaterial
         this.screenMesh = new THREE.Mesh(this.screenGeometry, this.screenMaterial);
-        this.gameWorld.scene.add(this.screenMesh)
 
         // set position and rotation
         this.screenMesh.position.set(30, 40, 100)                         // far away in +z direction
         this.screenMesh.quaternion.set(0, 0.9805807, -0.1961161, 0)       // facing track and tilted down a bit
+        
+        // add to scene
+        this.gameWorld.scene.add(this.screenMesh)
+
+
+        this.screenLight = new THREE.RectAreaLight( 0x8822aa, 0.25, this.screenWidth, this.screenHeight );
+        this.screenLight.quaternion.set(-0.258819, 0, 0, 0.9659258)    // rotate to face +x direction
+        this.screenLight.position.set( 30, 40, 120 );
+        this.screenBody = new RectAreaLightHelper( this.screenLight )
+
+
+        this.gameWorld.scene.add( this.screenLight );
+        this.gameWorld.scene.add( this.screenBody );
+
+
+
 
     }
 
@@ -136,7 +144,8 @@ export class SpawnArea {
     makePlatform() {
         this.platform   =   new FloorPiece( this.gameWorld, 
                                             [ this.platformXStart, this.platformY, this.trackZCentre ], 
-                                            [ this.platformXLength, 0.5, ( this.doorWidth / 2 ) ]
+                                            [ this.platformXLength, 0.5, ( this.doorWidth / 2 ) ],
+                                            10.0
                                           );
     }
 }
@@ -169,9 +178,11 @@ export class SpawnArea {
 
 export class Staircase {
 
-    constructor( gameWorld, startingPosition, numberOfSteps, stairDepth, stairWidth ) {
+    constructor( gameWorld, startingPosition, numberOfSteps, stairDepth, stairWidth, colorHue ) {
 
         this.gameWorld = gameWorld;
+        
+        this.colorHue = colorHue;
 
         this.stepsArray = [];
 
@@ -199,7 +210,8 @@ export class Staircase {
                                                     this.startingPosition[2] ],
                                                   [ this.stairDepth, 
                                                     this.stairHeight, 
-                                                    this.stairWidth ]
+                                                    this.stairWidth ],
+                                                    this.colorHue
                                                 );
 
             this.stepsArray.push( this.tempFloorPiece );
@@ -215,7 +227,14 @@ export class Staircase {
 
 export class FloorPiece {
     
-    constructor( gameWorld, position, size ) {
+    constructor( gameWorld, position, size, colorHue ) {
+
+        this.colorHue = colorHue;
+
+        if (this.colorHue > 2) { 
+            this.colorLightness = 1.0 }
+        else { 
+            this.colorLightness = 0.6 }
         
         this.gameWorld = gameWorld;
 
@@ -232,7 +251,8 @@ export class FloorPiece {
         this.createFloorMesh();
 
         //this.gameWorld.rigidBodies.push( { mesh: this.floorMesh, motionstate: this.floorMotionState } );  // not needed because doesnt move
-        
+
+
     }
 
     createFloorBody() {
@@ -270,8 +290,40 @@ export class FloorPiece {
                                                     this.floorSize.z 
                                                   );
                                                   
-        // this.floorMaterial = new THREE.ShaderMaterial( { vertexShader, fragmentShader } );
-        this.floorMaterial = new THREE.MeshStandardMaterial({ color: 0xbcbcbc, roughness: 0.1, metalness: 0.1 } );
+        
+
+
+
+
+        // colour variation
+
+        this.color = new THREE.Color();
+
+        let position = this.floorGeometry.attributes.position;
+
+        this.floorGeometry = this.floorGeometry.toNonIndexed(); // ensure each face has unique vertices
+
+        position = this.floorGeometry.attributes.position;
+        this.colorsFloor = [];
+
+        for ( let i = 0, l = position.count; i < l; i ++ ) {
+
+            this.color.setHSL(  this.colorHue + Math.random() * 0.2, 
+                                0.75, 
+                                this.colorLightness + Math.random() * 0.3, 
+                                THREE.SRGBColorSpace 
+                             );
+            this.colorsFloor.push( this.color.r, this.color.g, this.color.b );
+
+        }
+
+        this.floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( this.colorsFloor, 3 ) );
+
+
+
+        this.floorMaterial = new THREE.MeshStandardMaterial({ color: 0xbcbcbc, roughness: 0.1, metalness: 0.3, vertexColors: true  } );
+        
+
         this.floorMesh = new THREE.Mesh( this.floorGeometry, this.floorMaterial );
 
 

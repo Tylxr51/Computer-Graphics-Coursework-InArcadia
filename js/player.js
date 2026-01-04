@@ -151,7 +151,10 @@ class PlayerControls {
 
         // set sprint and sprint settings variables
         this.sprint = false;
+
+        // set dash variable
         this.dash = false;
+        this.canDash = true;
 
         this.dashTimer = new THREE.Clock( false );
         this.dashTimer.elapsedTime = dashCooldown;
@@ -218,7 +221,8 @@ class PlayerControls {
 
             case 'KeyR':
 
-                this.startDash = true;
+                // if dash has not recharged yet, don't let dash start
+                if ( this.canDash ) { this.startDash = true };
 
                 break;
 
@@ -309,33 +313,54 @@ class PlayerControls {
         document.addEventListener( 'keyup', this.onKeyUp );
     }
 
+    // function that is called each gameloop that checks if player is dashing
     dashLogic() {
 
-        if (this.startDash) {
+        // get value of cooldown timer each gameloop
+        this.timeSinceDash = this.dashTimer.getElapsedTime();
+        this.dashProgress =  THREE.MathUtils.clamp( ( this.timeSinceDash / dashCooldown ), 0, 1 ) * 100
 
+        if ( this.dashProgress < 100 ) { this.canDash = false }
+        else { this.canDash = true };
+
+        // initiate dash if key has just been pressed
+        if ( this.startDash ) {
+
+            // store direction so you dash in a straight line
             this.dashDirection.copy( this.lookDirection );
+
+            // set to dash in progess
             this.dash = true;
+
+            // set to false so dash is not continually initiated
             this.startDash = false;
 
+            // start cooldown timer
             this.dashTimer.start();
 
         };
-
-        dashRechargeState = this.dashTimer.getElapsedTime();
         
+        // if not dashing then return
         if ( !this.dash ) { return };
         
+        // alter FOV change speed whether sprinting or walking so not jarring
         if ( this.sprint ) { this.FOVDashChangeSpeed = 0.3 }
         else  { this.FOVDashChangeSpeed = 0.1 }
         
+        // only increase fov for a short period so it feels like a short and quick acceleration
         if ( this.dashTimer.getElapsedTime() < 0.07 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, this.FOVDashChangeSpeed ) };
 
+        // set movement speed to dash speed
         this.movementSpeed = this.currentDashSpeed;
+
+        // smoothly decrease dash speed back to normal
         this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 0.1 );
 
+        // set the movement direction to the dash direction that was stored at the start of the dash
         this.movementDirection.copy( this.dashDirection );
 
-        if ( this.currentDashSpeed < this.walkSpeed + ((this.dashSpeed - this.walkSpeed) / 2) ) {
+        // if speed is within a specified range of walking speed then stop dash
+        if ( this.currentDashSpeed < this.walkSpeed + (( this.dashSpeed - this.walkSpeed ) / 2) ) {
             this.dash = false;
             this.currentDashSpeed = this.dashSpeed;
             this.movementSpeed = this.walkSpeed;
@@ -413,9 +438,8 @@ class PlayerControls {
         this.movementDirection.addScaledVector( this.rightVector, this.inputDirection.y );
         this.movementDirection.normalize();
         
+        // handle dash logic
         this.dashLogic();
-        
-
         
         // scale movement according to movement speed
         this.scaledMovementDirection.copy( this.movementDirection ).multiplyScalar( this.movementSpeed );
@@ -447,7 +471,7 @@ class PlayerControls {
                                                 );
 
         gameWorld.thirdPersonCamera.position.set( this.ghostLocation.x(),
-                                                  THREE.MathUtils.clamp( this.ghostLocation.y() + 0.5, -10, 5),
+                                                  this.ghostLocation.y() + ( this.player.playerHeight / 2) + 2.5,
                                                   gameWorld.thirdPersonCameraDistanceFromScene
                                                 );
         gameWorld.thirdPersonCamera.lookAt( this.ghostLocation.x(),

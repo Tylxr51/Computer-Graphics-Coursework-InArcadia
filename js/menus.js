@@ -149,7 +149,6 @@ export class InstructionsGameMenu extends Menu {
     }
 }
 
-// MAKE IT A BUTTON NOT JUST WHOLE SCREEN
 // pause menu class using base menu class
 export class PauseGameMenu extends Menu {
 
@@ -188,7 +187,12 @@ export class PauseGameMenu extends Menu {
 
                 player.playerControls.cameraController.lock();   // lock user cursor
 
-                gameInProgress = true;
+                gameInProgress = true;          // restart game loop
+
+                // add on the dash recharge from before the cooldown was stopped and start cooldown again
+                this.storedDashTime = player.playerControls.dashTimer.elapsedTime;
+                player.playerControls.dashTimer.start();
+                player.playerControls.dashTimer.elapsedTime = this.storedDashTime;
 
             }, this.unpauseDelayTime );
         }
@@ -226,6 +230,8 @@ export class DeadGameMenu extends Menu {
             player.playerControls.cameraController.lock();  // lock user cursor
             player.spawnPlayer(isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion);     // spawn player
 
+            gameInProgress = true;          // restart game loop
+
         }
 
         this.onExitGameDeadButtonClick = () => { this.exitLevel() }
@@ -237,4 +243,41 @@ export class DeadGameMenu extends Menu {
         this.resumeButton.addEventListener('click', this.onRespawnButtonClick, { signal: abortController.signal } );
         this.exitGameButton.addEventListener('click', this.onExitGameDeadButtonClick, { signal: abortController.signal } );
     }
+}
+
+export class HUD {
+
+    constructor( classHTMLName ) {
+
+        this.dash = document.querySelector( classHTMLName );
+        this.progressBarChargedColor = '#68ef93';
+        this.progressBarChargingColor = '#e87373';
+
+    }
+
+    updateDashProgress( amount ) {
+
+        this.dash.style.setProperty('--progress', amount );
+
+        if (amount == 100) { this.dash.style.setProperty('--progress-bar-color', this.progressBarChargedColor )}
+        else { this.dash.style.setProperty('--progress-bar-color', this.progressBarChargingColor  )}
+
+    }
+
+    showHUD() {
+
+        this.dash.style.opacity = '1';
+
+    }
+
+    hideHUD() {
+
+        this.dash.style.opacity = '0';
+
+    }
+
+
+
+
+
 }
