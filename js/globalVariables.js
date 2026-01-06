@@ -29,6 +29,9 @@ let runFOV = walkFOV + 15;
 let dashFOV = runFOV + 10;
 
 function writeVariable( HTMLLocation, variable ) {
-    const variableText = ( variable ) ? 'on' : 'off';
-    HTMLLocation.innerHTML = variableText;
+    console.log(typeof(variable))
+    if ( typeof(variable) == 'boolean' ) {
+        variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) );
+    }
+    HTMLLocation.innerHTML = variable;
 }
