@@ -1,5 +1,12 @@
 # Commit Log
 
+#### 06.01.26
+
+- Added an out of bounds trigger to kill player when they fall off the track
+- Added a level complete trigger to complete the level when they reach the end
+- Changed settings to show variable states as on/off rather than true/false
+- Got rid of copy and pasted styles in index.html and made separate css files
+
 #### 04.01.26
 
 - Added some color variation in FloorPieces

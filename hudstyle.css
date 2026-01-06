@@ -1,0 +1,58 @@
+/* hud container */
+.hud {
+
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+
+}
+
+/* outer progress ring ( circle to be cut-out from ) */
+.dash-progress {
+
+    opacity: 0;
+    --size: 40px;
+    --thickness: 4px;
+    --progress: 0;
+    --progress-bar-color: #68ef93;
+
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+
+    background:
+        conic-gradient(
+
+            var(--progress-bar-color) 0% calc(var(--progress) * 1%),
+            rgba(255, 255, 255, 0.15) calc(var(--progress) * 1%) 100%
+
+        );
+
+    display: grid;
+    place-items: center;
+
+}
+
+/* inner circle ( cut-out to make it a ring not a circle ) */
+.dash-progress::before {
+
+    content: "";
+    width: calc(var(--size) - var(--thickness) * 2);
+    height: calc(var(--size) - var(--thickness) * 2);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+
+}
+
+/* center text */
+.dash-text {
+
+    position: absolute;
+    font-size: 10px;
+    color: white;
+    font-family: monospace;
+    pointer-events: none;
+    
+}

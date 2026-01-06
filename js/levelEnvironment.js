@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import World from '/js/buildWorld.js'
 import Player from '/js/player.js'
 import OverheadLights from '/js/lighting.js';  
-import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen } from '/js/objectSpawner.js'
-import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu, HUD } from '/js/menus.js'
+import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform } from '/js/objectSpawner.js'
+import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu, LevelCompleteGameMenu, HUD } from '/js/menus.js'
 
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
@@ -36,6 +36,7 @@ export default class level {
         this.instructionsMenu;
         this.pauseMenu;
         this.deadMenu;
+        this.levelCompleteMenu;
 
         this.buildLevelBackend();       // create world, player, and menus
         this.chooseLevelScene( levelIndex );      // create scene
@@ -88,26 +89,41 @@ export default class level {
                                           this.ammoPlayerSpawnPosition, 
                                           this.ammoPlayerSpawnQuaternion 
                                         );
+        this.levelCompleteMenu = new LevelCompleteGameMenu( 'level-complete-menu', 
+                                          this.player, 
+                                          this.abortController, 
+                                          this.isInitialSpawn, 
+                                          this.ammoPlayerSpawnPosition, 
+                                          this.ammoPlayerSpawnQuaternion 
+                                        );
         this.hud = new HUD( '.dash-progress' );
         this.hud.showHUD();
         this.instructionsMenu.showMenu();                   // show instruction menu
-        this.player.playerControls.turnOffMovement();       //  disable player movement
+        this.player.playerControls.turnOffMovement();       // disable player movement
 
         // functions for listeners below
-        this.onUnlock = this.pauseGame.bind(this);
-        this.onTriggerPlayerDeath = this.killPlayer.bind(this);
-        this.onSwitchCamera = this.switchCamera.bind(this);
+        this.onUnlock = this.pauseGame.bind( this );
+        this.onTriggerPlayerDeath = this.killPlayer.bind( this );
+        this.onSwitchCamera = this.switchCamera.bind( this );
+        this.onTriggerLevelPassed = this.levelPassed.bind( this );
 
         // make listeners
         document.addEventListener( 'keydown', this.keyCommands, { signal: this.abortController.signal } );      // listener for key down but not tied to player object
-        this.player.playerControls.cameraController.addEventListener('unlock', this.onUnlock, { signal: this.abortController.signal } );    // cursor unlock logic
-        document.addEventListener('trigger-player-death', this.onTriggerPlayerDeath, { signal: this.abortController.signal });              // player death logic
-        document.addEventListener('switch-camera', this.onSwitchCamera, { signal: this.abortController.signal } );                          // camera angle toggle
+        this.player.playerControls.cameraController.addEventListener( 'unlock', this.onUnlock, { signal: this.abortController.signal } );    // cursor unlock logic
+        document.addEventListener( 'trigger-player-death', this.onTriggerPlayerDeath, { signal: this.abortController.signal });              // player death logic
+        document.addEventListener( 'trigger-level-passed', this.onTriggerLevelPassed, { signal: this.abortController.signal } );
+        document.addEventListener( 'switch-camera', this.onSwitchCamera, { signal: this.abortController.signal } );                          // camera angle toggle
 
     }
 
     // function that chooses which level to load
     chooseLevelScene( levelIndex ) {
+        
+        //////////////////////////////////////
+        /////////////// SCREEN ///////////////
+        //////////////////////////////////////
+
+        this.screen = new Screen( this.gameWorld )
 
         switch ( levelIndex ) {
         
@@ -135,14 +151,13 @@ export default class level {
         this.trackZCentre = 0.00;
 
 
-
         //////////////////////////////////////
-        /////////////// SCREEN ///////////////
+        /////////// OUT OF BOUNDS ////////////
         //////////////////////////////////////
 
-        this.screen = new Screen( this.gameWorld )
+        this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
 
-        
+
 
         //////////////////////////////////////
         /////////// SPAWN PLATFORM ///////////
@@ -407,6 +422,31 @@ export default class level {
         // this.gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
 
 
+        //////////////////////////////////////
+        ////////// LEVEL COMPLETE ////////////
+        //////////////////////////////////////
+
+        this.levelCompletePlatformXStart = this.rightFloorBetweenTubesXStart + this.rightFloorBetweenTubesXLength + this.tubeWallThickness;
+        this.levelCompletePlatformXLength = this.rightFloorAfterSecondTubeXStart - this.tubeWallThickness - this.levelCompletePlatformXStart;
+        this.levelCompletePlatformThickness = 0.5;
+        this.levelCompletePlatformY = this.tubeSectionFloorHeight - this.tubeDropLength + this.levelCompletePlatformThickness
+        this.levelCompleteZLength = this.tubeZLength;
+        this.levelCompleteZCentre = this.trackZCentre + this.tubeZLength;
+
+        this.levelCompletePlatform = new LevelCompletePlatform( this.gameWorld, 
+                                                                this.player, 
+                                                                [ this.levelCompletePlatformXStart,
+                                                                  this.levelCompletePlatformY,
+                                                                  this.levelCompleteZCentre
+                                                                ], 
+                                                                [ this.levelCompletePlatformXLength,
+                                                                  this.levelCompletePlatformThickness,
+                                                                  this.levelCompleteZLength
+                                                                ]
+                                                               );
+
+
+
         // Set up lighting
         const directionalLight = new THREE.DirectionalLight( 0xffffff );
         directionalLight.position.set( 30, 40, 100 );
@@ -448,13 +488,8 @@ export default class level {
         this.trackZCentre = 0.00;
 
 
-
-        //////////////////////////////////////
-        /////////////// SCREEN ///////////////
-        //////////////////////////////////////
-
-        this.screen = new Screen( this.gameWorld )
-
+        this.levelCompletePlatform = new LevelCompletePlatform( this.gameWorld, this.player, [0,2,0], [4,1,2]);
+        this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
 
 
         //////////////////////////////////////
@@ -725,6 +760,18 @@ export default class level {
 
     }
 
+    // function triggered on level passed
+    levelPassed() {
+
+        gameInProgress = false;     // stop gameloop
+
+        this.player.playerIsDead = true;                        // change player state variable
+        this.player.playerControls.cameraController.unlock();   // unlock user cursor
+        this.levelCompleteMenu.showMenu();                               // show dead menu
+        this.player.playerControls.turnOffMovement();           // disable player movement
+
+    }
+
     // function to set current camera to first person
     useFirstPersonCamera() {
 
@@ -763,6 +810,25 @@ export default class level {
         }
     }
 
+    checkPlayerCollisions() {
+
+        this.numOverlaps = this.player.ghostObject.getNumOverlappingObjects();
+        
+        for ( let i = 0; i < this.numOverlaps; i++ ) {
+            this.obj = this.player.ghostObject.getOverlappingObject(i);
+
+            // if hit levelComplete then trigger levelComplete contactEvent
+            if ( Ammo.getPointer(this.obj) === Ammo.getPointer( this.levelCompletePlatform.platformBody ) ) {
+                this.levelCompletePlatform?.triggerContactEvent();
+            }
+
+            // if hit outOfBounds and only outOfBounds then trigger outOfBounds contactEvent (had to add the 'and only' condition to stop permadeath glitch)
+            else if ( Ammo.getPointer(this.obj) === Ammo.getPointer( this.outOfBoundsPlatform.platformBody ) && this.numOverlaps == 1 ) {
+                this.outOfBoundsPlatform?.triggerContactEvent();
+            }
+        }
+    }
+
     // game loop
     gameloop() {
 
@@ -785,6 +851,8 @@ export default class level {
 
             this.player.playerControls.updatePlayerMotion( this.gameWorld );    //  move player according to user input
         
+            this.checkPlayerCollisions();
+
         }
 
         this.gameWorld.renderer.render(this.gameWorld.scene, this.currentCamera );   //  render scene
@@ -807,6 +875,7 @@ export default class level {
         this.instructionsMenu.hideMenu();
         this.pauseMenu.hideMenu();
         this.deadMenu.hideMenu();
+        this.levelCompleteMenu.hideMenu();
         this.hud.hideHUD();
 
         // set variables to null
@@ -820,6 +889,7 @@ export default class level {
         this.instructionsMenu = null;
         this.pauseMenu = null;
         this.deadMenu = null;
+        this.levelCompleteMenu = null;
         this.hud = null;
     }
 

@@ -33,6 +33,89 @@ export class RigidBody {
     }
 }
 
+export class triggerPlatform {
+
+    constructor( gameWorld, player, position, size, contactEvent, debugColor ) {
+
+        this.gameWorld = gameWorld;     // define gameWorld
+        this.player = player;
+        this.contactEvent = contactEvent;
+
+        this.mass = 0;                  // immovable
+
+        this.ammoPlatformPosition = new Ammo.btVector3( position[0] + ( size[0] / 2 ), position[1] - ( size[1] / 2 ), position[2] );   // position for rigidbody
+        this.ammoPlatformQuaternion = new Ammo.btQuaternion( 0, 0, 0, 1 );                                 // rotation for rigidbody
+        this.ammoPlatformSize = new Ammo.btVector3( 0.5 * size[0], 0.5 * size[1], size[2]);                // size for rigidbody
+
+        this.platformShape = new Ammo.btBoxShape( this.ammoPlatformSize );
+        this.platformShape.setMargin( 0.05 );
+
+        this.platformTransform = new Ammo.btTransform();      // set up platform transform 
+        this.platformTransform.setIdentity();
+        this.platformTransform.setOrigin( this.ammoPlatformPosition );          // position platform
+        this.platformTransform.setRotation( this.ammoPlatformQuaternion );      // rotate platform
+        
+
+
+        this.platformInertia = new Ammo.btVector3( 0, 0, 0 );
+
+        this.platformMotionState = new Ammo.btDefaultMotionState( this.platformTransform );
+
+        this.platformInfo = new Ammo.btRigidBodyConstructionInfo( this.mass,
+                                                                  this.platformMotionState,
+                                                                  this.platformShape,
+                                                                  this.platformInertia
+                                                                );
+
+        this.platformBody = new Ammo.btRigidBody( this.platformInfo );
+
+        this.platformBody.setCollisionFlags( Ammo.btBroadphaseProxy.StaticFilter );
+
+        // Add to world
+        this.gameWorld.physicsWorld.addRigidBody( this.platformBody,
+                                                  Ammo.btBroadphaseProxy.StaticFilter,
+                                                  Ammo.btBroadphaseProxy.CharacterFilter
+                                                );
+
+
+        this.platformGeometry = new THREE.BoxGeometry( size[0], size[1], 2*size[2] );
+
+        this.platformMaterial = new THREE.MeshStandardMaterial( { color: debugColor } );
+        this.platformMesh = new THREE.Mesh( this.platformGeometry, this.platformMaterial );
+        this.platformMesh.position.set( this.ammoPlatformPosition.x(), this.ammoPlatformPosition.y(), this.ammoPlatformPosition.z() )
+        if ( debug ) { this.gameWorld.scene.add( this.platformMesh ) };
+
+    }
+
+    triggerContactEvent() {
+        
+        document.dispatchEvent( new CustomEvent( this.contactEvent ) );
+
+    }
+
+}
+
+export class LevelCompletePlatform extends triggerPlatform {
+
+    constructor( gameWorld, player, position, size ) {
+
+        super( gameWorld, player, position, size, 'trigger-level-passed', 0x00ff00 );
+
+    }
+
+}
+
+export class OutOfBoundsPlatform extends triggerPlatform {
+
+    constructor( gameWorld, player ) {
+
+        super( gameWorld, player, [-30, -40, 0], [150, 0.5, 50], 'trigger-player-death', 0xff0000 );
+        
+    }
+    
+}
+
+
 function initRectAreaLight() {
 
     if (!isRectAreaLightUniformLibInit) { 
@@ -50,15 +133,19 @@ export class Screen {
     constructor( gameWorld ) {
         
         this.gameWorld = gameWorld;
+        
         initRectAreaLight();
-
+        
         // load texture to go on screen
         this.screenTexture = new THREE.TextureLoader().load('./assets/screenTexture.png')
-
+        
         // screen size
         this.screenWidth = 144.0;
         this.screenHeight = 90.0;
-
+        this.screenX = 30;
+        this.screenY = 40;
+        this.screenZ = 100;
+        
         // screen geometry
         this.screenGeometry = new THREE.PlaneGeometry( this.screenWidth, this.screenHeight, 100, 100 );
 
@@ -81,16 +168,16 @@ export class Screen {
         this.screenMesh = new THREE.Mesh(this.screenGeometry, this.screenMaterial);
 
         // set position and rotation
-        this.screenMesh.position.set(30, 40, 100)                         // far away in +z direction
+        this.screenMesh.position.set(this.screenX, this.screenY, this.screenZ)                         // far away in +z direction
         this.screenMesh.quaternion.set(0, 0.9805807, -0.1961161, 0)       // facing track and tilted down a bit
         
         // add to scene
         this.gameWorld.scene.add(this.screenMesh)
 
 
-        this.screenLight = new THREE.RectAreaLight( 0x8822aa, 0.25, this.screenWidth, this.screenHeight );
+        this.screenLight = new THREE.RectAreaLight( 0x8822aa, 0.25, this.screenWidth, this.screenHeight - 20 );
         this.screenLight.quaternion.set(-0.258819, 0, 0, 0.9659258)    // rotate to face +x direction
-        this.screenLight.position.set( 30, 40, 120 );
+        this.screenLight.position.set( this.screenX, this.screenY + 10, this.screenZ + 20 );
         this.screenBody = new RectAreaLightHelper( this.screenLight )
 
 

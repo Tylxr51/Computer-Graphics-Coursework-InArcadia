@@ -1,11 +1,12 @@
 import Level from '/js/levelEnvironment.js'
-import { MainMainMenu, LevelsMainMenu, SettingsMainMenu } from '/js/menus.js'
+import { MainMainMenu, LevelsMainMenu, SettingsMainMenu, ControlsMainMenu } from '/js/menus.js'
 
 
 let AmmoLib
 let mainMenu;
 let levelsMenu;
 let settingsMenu;
+let controlsMenu;
 
 
 
@@ -54,9 +55,9 @@ async function loadShader( url ) {
 async function loadPackages() {
 
     [ AmmoLib, screenVertexShader, screenFragmentShader ] = await Promise.all([ Ammo(), 
-                                                                          loadShader('/shaders/screen-vertex-shader.glsl'), 
-                                                                          loadShader('/shaders/screen-fragment-shader.glsl') 
-                                                                        ]);
+                                                                                loadShader('/shaders/screen-vertex-shader.glsl'), 
+                                                                                loadShader('/shaders/screen-fragment-shader.glsl') 
+                                                                            ]);
     
 
     Ammo = AmmoLib;
@@ -71,9 +72,10 @@ async function main() {
     document.body.style.margin = '0';       // remove borders around canvas
 
     // initialise main menus
+    controlsMenu = new ControlsMainMenu( 'controls-menu' )
     settingsMenu = new SettingsMainMenu( 'settings-menu' );
     levelsMenu = new LevelsMainMenu( 'levels-menu' );
-    mainMenu = new MainMainMenu( 'main-menu', levelsMenu, settingsMenu );
+    mainMenu = new MainMainMenu( 'main-menu', levelsMenu, settingsMenu, controlsMenu );
 
     // function called on level selection
     let onLaunchLevel = ( e ) => {

@@ -24,7 +24,7 @@ export default class Player {
         // set up player ghost object
         this.ghostObject = new Ammo.btPairCachingGhostObject();
         this.ghostObject.setCollisionShape( this.playerShape );
-        this.ghostObject.setCollisionFlags( Ammo.btCollisionObject.CF_CHARACTER_OBJECT) ;     // lets physicsWorld know which objects this should collide with
+        this.ghostObject.setCollisionFlags( Ammo.btCollisionObject.CF_CHARACTER_OBJECT ) ;     // lets physicsWorld know which objects this should collide with
 
         // set up player kinematic controller
         this.movementController = new Ammo.btKinematicCharacterController(
@@ -138,7 +138,11 @@ class PlayerControls {
         this.renderer = renderer
         this.movementController = movementController;
         this.cameraController = new PointerLockControls( this.camera, this.renderer.domElement );
-        this.cameraController.pointerSpeed = 0.5;
+        
+        // set camera control settings (avoid direction glitches by ensuring player can't look directly down or up)
+        this.cameraController.minPolarAngle = 0.001; 
+		this.cameraController.maxPolarAngle = Math.PI - 0.001;
+        this.cameraController.pointerSpeed = 0.7;                   // sensitivity
 
         // set movement variables
         this.moveForward = false;

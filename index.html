@@ -1,167 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
-    <title>Arcade</title>
-    <style>
-      #main-menu {
-        width: 100%;
-        height: 100%;
 
-        display: none;
-        position: absolute;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+    <title>InArcadia</title>
 
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
+    <link rel="stylesheet" type="text/css" href="./hudstyle.css">
+    <link rel="stylesheet" type="text/css" href="./menustyle.css">
+    <link rel="stylesheet" type="text/css" href="./generalstyle.css">
 
-        background-color: rgba(0,0,0,1);
-      }
-
-      #settings-menu {
-        width: 100%;
-        height: 100%;
-
-        display: none;
-        position: absolute;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
-
-        background-color: rgba(0,0,0,1);
-      }
-
-      #levels-menu {
-        width: 100%;
-        height: 100%;
-
-        display: none;
-        position: absolute;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
-
-        background-color: rgba(0,0,0,1);
-      }
-
-      #instructions-menu {
-        width: 100%;
-        height: 100%;
-
-        display: none;
-        position: absolute;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
-
-        background-color: rgba(0,0,0,0.7);
-      }
-
-      #paused-menu {
-        display: none;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.7);
-
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
-      }
-
-      #dead-menu {
-        display: none;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 84, 84, 0.7);
-
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        text-align: center;
-        font-size: 14px;
-        color: white;
-        cursor: pointer;
-      }
-
-      /* hud container */
-      .hud {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-      }
-
-      /* outer progress ring ( circle to be cut-out from ) */
-      .dash-progress {
-        opacity: 0;
-        --size: 40px;
-        --thickness: 4px;
-        --progress: 0;
-        --progress-bar-color: #68ef93;
-
-        width: var(--size);
-        height: var(--size);
-        border-radius: 50%;
-
-        background:
-          conic-gradient(
-
-            var(--progress-bar-color) 0% calc(var(--progress) * 1%),
-            rgba(255, 255, 255, 0.15) calc(var(--progress) * 1%) 100%
-
-          );
-
-        display: grid;
-        place-items: center;
-      }
-
-      /* inner circle ( cut-out to make it a ring not a circle ) */
-      .dash-progress::before {
-        content: "";
-        width: calc(var(--size) - var(--thickness) * 2);
-        height: calc(var(--size) - var(--thickness) * 2);
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 50%;
-      }
-
-      /* center text */
-      .dash-text {
-        position: absolute;
-        font-size: 10px;
-        color: white;
-        font-family: monospace;
-        pointer-events: none;
-      }
-
-    </style>
   </head>
+
   <body>
 
     <script src="js/globalVariables.js" type="text/javascript"></script>
@@ -169,103 +18,137 @@
     <script src="shaders/fragment-shader.glsl" type="x-shader/x-fragment"></script>
     <script src="three.js-r170/examples/jsm/libs/ammo.wasm.js"></script>
 
-    <div id="main-menu">
-        <p style="font-size:36px">
-            Main Menu
-        </p>
-        <p>
-          <button id="levels-button" class="btn">Levels</button>
-          <br></br>
-          <button id="settings-button" class="btn">Settings</button>
-        </p>
+
+    <div id="main-menu" class="main-menu-style">
+
+      <h1> Main Menu </h1>
+
+      <button id="levels-button" class="btn">Levels</button>
+      <button id="controls-button" class="btn">Controls</button>
+      <button id="settings-button" class="btn">Settings</button>
+
     </div>
 
-    <div id="settings-menu">
-        <p style="font-size:36px">
-            Settings
-        </p>
 
-          <button id="toggle-sprint-button" class="btn">Toggle Sprint</button>
-          <div id="toggle-sprint-value">
-            <script type="text/javascript">
-              document.write(toggleSprint);
-            </script>
-          </div>
+    <div id="settings-menu" class="main-menu-style">
 
-          <button id="stationary-is-toggle-button" class="btn">Stationary is Toggle</button>
-          <p style='color:grey'>
-            (turns off sprinting when you stop moving)
-          </p>
-          <div id="stationary-is-toggle-value">
-            <script type="text/javascript">
-              document.write(stationaryIsToggle);
-            </script>
-          </div>
+      <h1> Settings </h1>
 
-          <button id="is-flicker-on-button" class="btn">Flicker</button>
-          <div id="is-flicker-on-value">
-            <script type="text/javascript">
-              document.write(isFlickerOn);
-            </script>
-          </div>
-          <p style='color:grey'>
-            (turns off screen flicker effect)
-          </p>
-        <p>
-          <button id="settings-back-button" class="btn">Back</button>
-        </p>
-    </div>
+      <button id="toggle-sprint-button" class="btn">Toggle Sprint</button>
+      <div id="toggle-sprint-value">
+        <!-- js will write value here -->
+      </div>
 
-    <div id="levels-menu">
-        <p style="font-size:36px">
-            Levels
-        </p>
+      <button id="stationary-is-toggle-button" class="btn">Stationary is Toggle</button>
+      <div id="stationary-is-toggle-value">
+        <!-- js will write value here -->
+      </div>
+      <p style='color:grey'>
+        (turns off sprinting when you stop moving)
+      </p>
 
-        <p>
-          <button id="level-0-button" class="btn">Level 0 (Tutorial)</button>
-          <br></br>
-          <button id="level-1-button" class="btn">Level 1</button>
-        </p>
+      <button id="is-flicker-on-button" class="btn">Flicker</button>
+      <div id="is-flicker-on-value">
+        <!-- js will write value here -->
+      </div>
+      <p style='color:grey'>
+        (turns off screen flicker effect)
+      </p>
+
+      <button id="toggle-debug-button" class="btn">Debug Mode</button>
+      <div id="toggle-debug-value">
+        <!-- js will write value here -->
+      </div>
+
+      <br></br>
+      <button id="settings-back-button" class="btn">Back</button>
+
         
-        <p>
-          <button id="levels-back-button" class="btn">Back</button>
-        </p>
     </div>
 
-    <div id="instructions-menu">
-        <p style="font-size:36px">
-            Click to play
-        </p>
-        <p>
-            Move: WASD<br/>
-            Jump: SPACE<br/>
-            Look: MOUSE
-        </p>
+
+    <div id="levels-menu" class="main-menu-style">
+      <h1> Levels </h1>
+
+      <button id="level-0-button" class="btn">Level 0 (Tutorial)</button>
+      <button id="level-1-button" class="btn">Level 1</button>
+      <br></br>
+      <button id="levels-back-button" class="btn">Back</button>
+
     </div>
 
-    <div id="paused-menu">
-        <p style="font-size:36px">
-            Paused
-        </p>
-        <br></br>
-        <button id="resume-button" class="btn">Resume</button>
-        <br>
-          <div id="resume-status">
-            <!-- menu will write 'Resuming...' here when resume button is clicked -->
-          </div>
-        </br>
-        <button id="exit-game-paused-button" class="btn">Main Menu</button>
+
+    <div id="controls-menu" class="main-menu-style">
+      
+      <h1> Controls </h1>
+       
+      <p>
+        MOVE: WASD <br/>
+        LOOK: MOUSE <br/>
+        JUMP: SPACE <br/>
+        SPRINT: LEFT SHIFT <br/>
+        DASH: R <br/>
+        CAMERA TOGGLE: T
+      </p>
+
+      <p style="color:grey">
+        Override Key Commands:<br/>
+
+        KILL PLAYER: K<br/>
+        MAIN MENU: M
+      </p>
+
+      <br></br>
+      <button id="controls-back-button" class="btn">Back</button>
+
     </div>
 
-    <div id="dead-menu">
-        <p style="font-size:36px">
-            You died :/
-        </p>
-        <br></br>
-        <button id="respawn-button" class="btn">Respawn</button>
-        <br></br>
-        <button id="exit-game-dead-button" class="btn">Main Menu</button>
-        
+
+    <div id="instructions-menu" class="game-menu-style">
+
+      <h1> Objective </h1>
+
+      <p> 
+        Get to the end of the track!
+      </p>
+
+      <p style="color:grey">
+        Click anywhere to start
+      </p>
+
+
+    </div>
+
+
+    <div id="paused-menu" class="game-menu-style">
+
+      <h1> Paused </h1>
+      <br></br>
+      <button id="resume-button" class="btn">Resume</button>
+      <br>
+        <div id="resume-status">
+          <!-- menu will write 'Resuming...' here when resume button is clicked -->
+        </div>
+      </br>
+      <button id="exit-game-paused-button" class="btn">Main Menu</button>
+
+    </div>
+
+    <div id="dead-menu" class="game-menu-style">
+
+      <h1> You died :/ </h1>
+      <br></br>
+      <button id="respawn-button" class="btn">Respawn</button>
+      <button id="exit-game-dead-button" class="btn">Main Menu</button>
+
+    </div>
+
+    <div id="level-complete-menu" class="game-menu-style">
+
+      <h1> Level Complete! </h1>
+      <br></br>
+      <button id="exit-game-complete-button" class="btn">Main Menu</button>
+
     </div>
 
 

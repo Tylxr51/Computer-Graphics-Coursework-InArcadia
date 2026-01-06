@@ -26,21 +26,24 @@ class Menu {
 // main menu class using base menu class
 export class MainMainMenu extends Menu {
 
-    constructor ( menuHTMLName, levelsMenu, settingsMenu ) {
+    constructor ( menuHTMLName, levelsMenu, settingsMenu, controlsMenu ) {
         
         // get menu screen location, back button function, and show/hide functions
         super( menuHTMLName );
 
         // get menu button locations
         this.levelsButton = document.getElementById( 'levels-button' );
+        this.controlsButton = document.getElementById( 'controls-button' );
         this.settingsButton = document.getElementById( 'settings-button' );
 
         // define button click functions
         this.onLevelsButtonClick = () => levelsMenu.showMenu();
+        this.onControlsButtonClick = () => controlsMenu.showMenu();
         this.onSettingsButtonClick = () => settingsMenu.showMenu();
         
         // make listeners for button clicks
         this.levelsButton.addEventListener( 'click', this.onLevelsButtonClick );
+        this.controlsButton.addEventListener( 'click', this.onControlsButtonClick );
         this.settingsButton.addEventListener( 'click', this.onSettingsButtonClick );
     }
 }
@@ -77,6 +80,24 @@ export class LevelsMainMenu extends Menu {
 }
 
 
+export class ControlsMainMenu extends Menu {
+
+    constructor ( menuHTMLName ) {
+        
+        // get menu screen location, back button function, and show/hide functions
+        super( menuHTMLName );
+
+        // get menu button locations
+        this.backButton = document.getElementById('controls-back-button');
+
+        // define button click functions
+        
+        // make listeners for button clicks
+        this.backButton.addEventListener('click', this.onBackClick);
+    }
+}
+
+
 // settings menu class using base menu class
 export class SettingsMainMenu extends Menu {
 
@@ -85,48 +106,65 @@ export class SettingsMainMenu extends Menu {
         // get menu screen, back button function, and show/hide functions
         super ( menuHTMLName );
 
+        // get variable write locations
+        this.HTMLToggleSprintVariableLocation = document.getElementById( 'toggle-sprint-value' );
+        this.HTMLStationaryIsToggleVariableLocation = document.getElementById( 'stationary-is-toggle-value' );
+        this.HTMLIsFlickerOnVariableLocation = document.getElementById( 'is-flicker-on-value' );
+        this.HTMLDebugVariableLocation = document.getElementById( 'toggle-debug-value' );
+
+        // write variable states on initilisation
+        writeVariable( this.HTMLToggleSprintVariableLocation, toggleSprint );
+        writeVariable( this.HTMLStationaryIsToggleVariableLocation, stationaryIsToggle );
+        writeVariable( this.HTMLIsFlickerOnVariableLocation, isFlickerOn );
+        writeVariable( this.HTMLDebugVariableLocation, debug );
+
         // get menu button locations
         this.toggleSprintButton = document.getElementById( 'toggle-sprint-button' );
         this.stationaryIsToggleButton = document.getElementById( 'stationary-is-toggle-button' );
         this.isFlickerOnButton = document.getElementById( 'is-flicker-on-button' );
+        this.debugButton = document.getElementById( 'toggle-debug-button' );
         this.backButton = document.getElementById( 'settings-back-button' );
 
         // define button click functions
         this.onToggleSprintButtonClick = () => {
 
             toggleSprint = !toggleSprint;
-            this.HTMLToggleSprintVariableLocation = document.getElementById( 'toggle-sprint-value' );
-            writeVariable( this.HTMLToggleSprintVariableLocation, toggleSprint )
+            writeVariable( this.HTMLToggleSprintVariableLocation, toggleSprint );
 
         }
 
         this.onStationaryIsToggleButtonClick = () => {
 
             stationaryIsToggle = !stationaryIsToggle;
-            this.HTMLStationaryIsToggleVariableLocation = document.getElementById( 'stationary-is-toggle-value' );
-            writeVariable( this.HTMLStationaryIsToggleVariableLocation, stationaryIsToggle )
+            writeVariable( this.HTMLStationaryIsToggleVariableLocation, stationaryIsToggle );
 
         }
 
-        this.isFlickerOnButtonClick = () => {
+        this.onIsFlickerOnButtonClick = () => {
 
             isFlickerOn = !isFlickerOn;
-            this.HTMLIsFlickerOnVariableLocation = document.getElementById( 'is-flicker-on-value' );
-            writeVariable( this.HTMLIsFlickerOnVariableLocation, isFlickerOn )
+            writeVariable( this.HTMLIsFlickerOnVariableLocation, isFlickerOn );
+
+        }
+
+        this.onDebugButtonClick = () => {
+
+            debug = !debug;
+            writeVariable( this.HTMLDebugVariableLocation, debug );
 
         }
 
         // make listeners for button clicks
         this.toggleSprintButton.addEventListener( 'click', this.onToggleSprintButtonClick );
         this.stationaryIsToggleButton.addEventListener( 'click', this.onStationaryIsToggleButtonClick );
-        this.isFlickerOnButton.addEventListener( 'click', this.isFlickerOnButtonClick );
+        this.isFlickerOnButton.addEventListener( 'click', this.onIsFlickerOnButtonClick );
+        this.debugButton.addEventListener( 'click', this.onDebugButtonClick );
         this.backButton.addEventListener( 'click', this.onBackClick );
 
     }
 }
 
 
-// MAKE IT A BUTTON NOT JUST WHOLE SCREEN
 // instructions menu class using base menu class
 export class InstructionsGameMenu extends Menu {
 
@@ -245,6 +283,22 @@ export class DeadGameMenu extends Menu {
     }
 }
 
+// level complete menu class using base menu class
+export class LevelCompleteGameMenu extends Menu {
+
+    constructor( menuHTMLName, player, abortController, isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
+
+        // get menu screen, back button function, and show/hide functions
+        super( menuHTMLName );
+
+        this.onExitGameDeadButtonClick = () => { this.exitLevel() }
+
+        this.exitGameButton = document.getElementById( 'exit-game-complete-button' );
+
+        this.exitGameButton.addEventListener('click', this.onExitGameDeadButtonClick, { signal: abortController.signal } );
+    }
+}
+
 export class HUD {
 
     constructor( classHTMLName ) {
@@ -275,8 +329,6 @@ export class HUD {
         this.dash.style.opacity = '0';
 
     }
-
-
 
 
 
