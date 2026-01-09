@@ -21,15 +21,16 @@ let currentLevelEnvironment;
 let toggleSprint = true;        // set default to true, can be changed in settings
 let stationaryIsToggle = true;
 
-let dashCooldown = 2.0;
+let dashCooldown = 0.5;
 
 let userInputFOV = 75;          // set default value to 75, can be changed in settings
 let walkFOV = userInputFOV;
 let runFOV = walkFOV + 15;
-let dashFOV = runFOV + 10;
+let dashFOV = runFOV + 15;
+
+let mouseControlsSensitivity = 0.7;
 
 function writeVariable( HTMLLocation, variable ) {
-    console.log(typeof(variable))
     if ( typeof(variable) == 'boolean' ) {
         variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) );
     }

@@ -1,5 +1,12 @@
 # Commit Log
 
+#### 07.01.26
+
+- Finished level 1 scene
+- Reworked dash logic so dash is calculated per unit time not frame to avoid speed changes at different frame rates
+- Stopped camera moving when using third person camera
+- minor menu updates
+
 #### 06.01.26
 
 - Added an out of bounds trigger to kill player when they fall off the track

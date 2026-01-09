@@ -257,7 +257,7 @@ export default class level {
 
         ///// POSITION AND SIZE VARIABLES ////
 
-        this.dashGapDistance = 7.00;
+        this.dashGapDistance = 6.00;
         this.dashGapDrop = 9.50;                // from raisedSectionY to floorBelowDashEntryY
 
         this.dashGapOpeningXStart = this.floorAfterSprintJumpXStart + this.floorAfterSprintJumpXLength + this.dashGapDistance;
@@ -487,8 +487,6 @@ export default class level {
         this.trackWidth = 2.00;     // width of floorpieces
         this.trackZCentre = 0.00;
 
-
-        this.levelCompletePlatform = new LevelCompletePlatform( this.gameWorld, this.player, [0,2,0], [4,1,2]);
         this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
 
 
@@ -548,10 +546,10 @@ export default class level {
         this.mazeOpeningHeight = 2.5;
         
         this.mazeLowerFloorXStart = this.firstFloorXStart + this.firstFloorXLength + this.gapToMazeStartDistance;
-        this.mazeLowerFloorXLength = 30.00;
+        this.mazeLowerFloorXLength = 28.00;
         
         this.mazeFrontWallXStart = this.mazeLowerFloorXStart;
-        this.mazeFrontWallHeight = 20.0;
+        this.mazeFrontWallHeight = 13.0;
         this.mazeFrontWallY = this.lowerSectionY + this.mazeOpeningHeight + this.mazeFrontWallHeight;
 
         this.mazeCeilingXStart = this.mazeLowerFloorXStart;
@@ -560,13 +558,13 @@ export default class level {
 
         this.mazeBackWallXStart = this.mazeLowerFloorXStart + this.mazeLowerFloorXLength;
         this.mazeBackWallY = this.mazeCeilingY;
-        this.mazeBackWallHeight = this.mazeOpeningHeight + this.mazeFrontWallHeight;
+        this.mazeBackWallHeight = this.mazeOpeningHeight + this.mazeFrontWallHeight + this.mazeFrameThickness;
 
         this.mazeLeftWallXStart = this.mazeLowerFloorXStart;
         this.mazeLeftWallXLength = this.mazeLowerFloorXLength;
         this.mazeLeftWallY = this.mazeCeilingY;
         this.mazeLeftWallHeight = this.mazeBackWallHeight + this.mazeFrameThickness;
-        this.mazeLeftWallZCentre = this.trackZCentre - ( this.trackWidth ) - ( this.mazeFrameThickness / 2 );
+        this.mazeLeftWallZCentre = this.trackZCentre - ( this.trackWidth ) - ( this.mazePlatformThickness / 2 );
 
 
 
@@ -599,7 +597,7 @@ export default class level {
         
         this.mazeLeftWall       =   new FloorPiece( this.gameWorld,
                                                     [ this.mazeLeftWallXStart, this.mazeLeftWallY, this.mazeLeftWallZCentre ],
-                                                    [ this.mazeLeftWallXLength, this.mazeLeftWallHeight, this.mazeFrameThickness / 2 ],
+                                                    [ this.mazeLeftWallXLength, this.mazeLeftWallHeight, this.mazePlatformThickness / 2 ],
                                                     this.colorHue
                                                   );
 
@@ -614,7 +612,7 @@ export default class level {
         this.mazeLowerToMiddleJumpPlatformY = this.lowerSectionY + this.mazeLowerToMiddleJumpPlatformJumpHeight;
         this.mazeLowerToMiddleJumpPlatformZLength = this.trackWidth / 2
         
-        this.mazeLowerBigBoxXLength = 2.0;
+        this.mazeLowerBigBoxXLength = 4.0;
         this.mazeLowerBigBoxXStart = this.mazeBackWallXStart - this.mazeLowerBigBoxXLength;
         this.mazeLowerBigBoxHeight = 2.0;
         this.mazeLowerBigBoxY = this.lowerSectionY + this.mazeLowerBigBoxHeight;
@@ -628,7 +626,7 @@ export default class level {
         
         this.mazeLowerToMiddleJumpPlatform  =   new FloorPiece( this.gameWorld, 
                                                                 [ this.mazeLowerToMiddleJumpPlatformXStart, this.mazeLowerToMiddleJumpPlatformY, this.trackZCentre - this.mazeLowerToMiddleJumpPlatformZLength ],
-                                                                [ this.mazeLowerToMiddleJumpPlatformXLength, this.mazePlatformThickness, this.mazeLowerToMiddleJumpPlatformZLength],
+                                                                [ this.mazeLowerToMiddleJumpPlatformXLength, this.mazeLowerToMiddleJumpPlatformJumpHeight, this.mazeLowerToMiddleJumpPlatformZLength],
                                                                 this.colorHue
                                                               );
 
@@ -663,23 +661,279 @@ export default class level {
         this.mazeMiddleFloorBackSectionXLength = (this.mazeBackWallXStart - this.mazeMiddleFloorBackSectionXStart ) / 2;
         this.mazeMiddleFloorBackSectionY = this.mazeMiddleFloorFrontSectionY;
 
+        this.mazeMiddleWallToUpperXStart = this.mazeMiddleFloorBackSectionXStart + this.mazeMiddleFloorBackSectionXLength;
+        this.mazeMiddleWallToUpperHeight = 8.3;
+        this.mazeMiddleWallToUpperY = this.mazeMiddleFloorBackSectionY + this.mazeMiddleWallToUpperHeight;
+        this.mazeMiddleWallToUpperOpeningHeight = 1.5;
+
         this.mazeMiddleFloorFrontSection    =   new FloorPiece( this.gameWorld,
                                                                 [ this.mazeMiddleFloorFrontSectionXStart, this.mazeMiddleFloorFrontSectionY, this.trackZCentre ],
                                                                 [ this.mazeMiddleFloorFrontSectionXLength, this.mazePlatformThickness, this.trackWidth ],
                                                                 this.colorHue
                                                               );
 
-        this.mazeMiddleFloorMiddleSection    =   new FloorPiece( this.gameWorld,
+        this.mazeMiddleFloorMiddleSection   =   new FloorPiece( this.gameWorld,
                                                                 [ this.mazeMiddleFloorMiddleSectionXStart, this.mazeMiddleFloorMiddleSectionY, this.trackZCentre + this.mazeMiddleFloorMiddleSectionZLength ],
                                                                 [ this.mazeMiddleFloorMiddleSectionXLength, this.mazePlatformThickness, this.mazeMiddleFloorMiddleSectionZLength ],
                                                                 this.colorHue
                                                               );
 
-        this.mazeMiddleFloorMiddleSection    =   new FloorPiece( this.gameWorld,
+        this.mazeMiddleFloorBackSection     =   new FloorPiece( this.gameWorld,
                                                                 [ this.mazeMiddleFloorBackSectionXStart, this.mazeMiddleFloorBackSectionY, this.trackZCentre ],
                                                                 [ this.mazeMiddleFloorBackSectionXLength, this.mazePlatformThickness, this.trackWidth ],
                                                                 this.colorHue
                                                               );
+
+        this.mazeMiddleWallToUpper          =   new FloorPiece( this.gameWorld,
+                                                                [ this.mazeMiddleWallToUpperXStart, this.mazeMiddleWallToUpperY, this.trackZCentre ],
+                                                                [ this.mazePlatformThickness, this.mazeMiddleWallToUpperHeight - this.mazeMiddleWallToUpperOpeningHeight, this.trackWidth ],
+                                                                this.colorHue
+                                                              );
+
+        ///////////////////////////////////////
+        /////////// PARKOUR SECTION ///////////
+        ///////////////////////////////////////
+
+        this.parkourStartingBoxXLength = 2.0;
+        this.parkourStartingBoxXStart = this.mazeMiddleWallToUpperXStart - this.parkourStartingBoxXLength;
+        this.parkourStartingBoxHeight = this.mazeMiddleWallToUpperOpeningHeight;
+        this.parkourStartingBoxY = this.mazeMiddleFloorBackSectionY + this.parkourStartingBoxHeight;
+        this.parkourStartingBoxZLength = this.trackWidth / 2;
+        this.parkourStartingBoxZCentre = this.trackZCentre - this.parkourStartingBoxZLength;
+
+        this.jumpFromBoxToPlatformAfterBoxXDistance = 2.0;
+
+        this.parkourSmallPlatformXLength = 1.0;
+        this.parkourSmallPlatformZLength = this.trackWidth / 4;
+        this.parkourWidePlatformXLength = 4.0;
+        this.parkourWidePlatformZLength = this.trackWidth;
+        this.parkourWidePlatformZCentre = this.trackZCentre;
+
+        this.parkourPlatformAfterBoxXStart = this.parkourStartingBoxXStart - this.jumpFromBoxToPlatformAfterBoxXDistance - this.parkourSmallPlatformXLength;
+        this.parkourPlatformAfterBoxY = this.parkourStartingBoxY + 1;
+        this.parkourPlatformAfterBoxZCentre = this.trackZCentre - ( 3 * this.parkourSmallPlatformZLength );
+
+        this.jumpFromPlatformToFirstWideDistance = 3.0;
+
+        this.firstWidePlatformXStart = this.parkourPlatformAfterBoxXStart - this.jumpFromPlatformToFirstWideDistance - this.parkourWidePlatformXLength;
+        this.firstWidePlatformY = this.parkourPlatformAfterBoxY + 1;
+
+        this.jumpFromFirstWideToFirstPlatformAfterDistance = 2.0;
+
+        this.firstPlatformAfterFirstWideXStart = this.firstWidePlatformXStart - this.jumpFromFirstWideToFirstPlatformAfterDistance - this.parkourSmallPlatformXLength;
+        this.firstPlatformAfterFirstWideY = this.firstWidePlatformY + 1;
+
+        this.longPlatformAfterFirstWideZCentre = this.trackZCentre + ( 3 * this.parkourSmallPlatformZLength );
+        this.longPlatformAfterFirstWideXStart = this.firstWidePlatformXStart - this.jumpFromFirstWideToFirstPlatformAfterDistance - ( 2 * this.parkourSmallPlatformXLength );
+        this.longPlatformAfterFirstWideY = this.firstPlatformAfterFirstWideY + 1.0;
+
+        this.secondPlatformAfterFirstWideXStart = this.firstPlatformAfterFirstWideXStart - this.parkourSmallPlatformXLength;
+        this.secondPlatformAfterFirstWideY = this.longPlatformAfterFirstWideY + 1.0;
+
+        this.secondWidePlatformXStart = this.firstWidePlatformXStart;
+        this.secondWidePlatformY = this.secondPlatformAfterFirstWideY;
+
+        
+        
+        this.parkourStartingBox             =   new FloorPiece( this.gameWorld,
+                                                                [ this.parkourStartingBoxXStart, this.parkourStartingBoxY, this.parkourStartingBoxZCentre ],
+                                                                [ this.parkourStartingBoxXLength, this.parkourStartingBoxHeight, this.parkourStartingBoxZLength ],
+                                                                this.colorHue
+                                                              );
+        
+        this.parkourPlatformAfterBox        =   new FloorPiece( this.gameWorld,
+                                                                [ this.parkourPlatformAfterBoxXStart, this.parkourPlatformAfterBoxY, this.parkourPlatformAfterBoxZCentre ],
+                                                                [ this.parkourSmallPlatformXLength, this.mazePlatformThickness, this.parkourSmallPlatformZLength ],
+                                                                this.colorHue
+                                                              );
+        
+        this.firstWidePlatformAfterBox      =   new FloorPiece( this.gameWorld,
+                                                                [ this.firstWidePlatformXStart, this.firstWidePlatformY, this.parkourWidePlatformZCentre ],
+                                                                [ this.parkourWidePlatformXLength, this.mazePlatformThickness, this.parkourWidePlatformZLength ],
+                                                                this.colorHue
+                                                              );
+        
+        this.firstPlatformAfterFirstWide    =   new FloorPiece( this.gameWorld,
+                                                                [ this.firstPlatformAfterFirstWideXStart, this.firstPlatformAfterFirstWideY, this.parkourPlatformAfterBoxZCentre ],
+                                                                [ this.parkourSmallPlatformXLength, this.mazePlatformThickness, this.parkourSmallPlatformZLength ],
+                                                                this.colorHue
+                                                              );
+                                                            
+        this.longPlatformAfterFirstWide    =   new FloorPiece( this.gameWorld,
+                                                                [ this.longPlatformAfterFirstWideXStart, this.longPlatformAfterFirstWideY, this.longPlatformAfterFirstWideZCentre ],
+                                                                [ 2 * this.parkourSmallPlatformXLength, this.mazePlatformThickness, this.parkourSmallPlatformZLength ],
+                                                                this.colorHue
+                                                             );
+        
+        this.secondPlatformAfterFirstWide    =   new FloorPiece( this.gameWorld,
+                                                                [ this.secondPlatformAfterFirstWideXStart, this.secondPlatformAfterFirstWideY, this.parkourPlatformAfterBoxZCentre ],
+                                                                [ this.parkourSmallPlatformXLength, this.mazePlatformThickness, this.parkourSmallPlatformZLength ],
+                                                                this.colorHue
+                                                               );
+                                                            
+        this.secondWidePlatformAfterBox      =   new FloorPiece( this.gameWorld,
+                                                                [ this.secondWidePlatformXStart, this.secondWidePlatformY, this.parkourWidePlatformZCentre ],
+                                                                [ this.parkourWidePlatformXLength, this.mazePlatformThickness, this.parkourWidePlatformZLength ],
+                                                                this.colorHue
+                                                               );
+        
+        
+        
+        ///////////////////////////////////////
+        ////////////// STAIRCASE //////////////
+        ///////////////////////////////////////
+
+        
+        this.jumpToFirstStaicase = 1.5;
+
+        this.firstStaircaseToUpperXStart = this.secondWidePlatformXStart + this.parkourWidePlatformXLength + this.jumpToFirstStaicase;
+        this.firstStaircaseToUpperNumOfSteps = 6;
+        this.firstStaircaseToUpperStepDepth = 0.5;
+        this.firstStaircaseToUpperHeight = this.firstStaircaseToUpperNumOfSteps * 0.15;
+        this.firstStaircaseToUpperXLength = this.firstStaircaseToUpperNumOfSteps * this.firstStaircaseToUpperStepDepth;
+
+        this.staircaseHalfStepXStart = this.firstStaircaseToUpperXStart + this.firstStaircaseToUpperXLength;
+        this.staircaseHalfStepXLength = this.firstStaircaseToUpperStepDepth;
+        this.staircaseHalfStepY = this.secondWidePlatformY + this.firstStaircaseToUpperHeight;
+        this.staircaseHalfStepThickness = 0.15;
+        this.staircaseHalfStepZLength = this.trackWidth / 2;
+        this.staircaseHalfStepZCentre = this.trackZCentre - this.staircaseHalfStepZLength;
+
+        this.secondStaircaseToUpperXStart = this.staircaseHalfStepXStart + this.staircaseHalfStepXLength;
+        this.secondStaircaseToUpperNumOfSteps = 6;
+        this.secondStaircaseToUpperStepDepth = 0.5;
+        this.secondStaircaseToUpperHeight = this.secondStaircaseToUpperNumOfSteps * 0.15;
+        this.secondStaircaseToUpperXLength = this.secondStaircaseToUpperNumOfSteps * this.secondStaircaseToUpperStepDepth;
+
+        
+        this.firstStaircaseToUpper          =   new Staircase( this.gameWorld, 
+                                                               [ this.firstStaircaseToUpperXStart, this.secondWidePlatformY, this.parkourWidePlatformZCentre ], 
+                                                               this.firstStaircaseToUpperNumOfSteps, 
+                                                               this.firstStaircaseToUpperStepDepth, 
+                                                               this.parkourWidePlatformZLength, 
+                                                               this.colorHue
+                                                             );
+
+        this.staircaseHalfStep              =   new FloorPiece( this.gameWorld,
+                                                               [ this.staircaseHalfStepXStart, this.staircaseHalfStepY, this.staircaseHalfStepZCentre ],
+                                                               [ this.staircaseHalfStepXLength, this.staircaseHalfStepThickness, this.staircaseHalfStepZLength],
+                                                               this.colorHue
+                                                              );
+
+
+        this.secondStaircaseToUpper         =   new Staircase( this.gameWorld, 
+                                                               [ this.secondStaircaseToUpperXStart, this.staircaseHalfStepY, this.parkourWidePlatformZCentre ], 
+                                                               this.secondStaircaseToUpperNumOfSteps, 
+                                                               this.secondStaircaseToUpperStepDepth, 
+                                                               this.parkourWidePlatformZLength, 
+                                                               this.colorHue
+                                                             );
+
+
+        ///////////////////////////////////////
+        //////////// UPPER SECTION ////////////
+        ///////////////////////////////////////
+
+        this.upperFloorSectionXStart = this.mazeMiddleWallToUpperXStart + this.mazePlatformThickness;
+        this.upperFloorSectionXLength = this.mazeBackWallXStart - this.upperFloorSectionXStart;
+        this.upperFloorSectionY = this.staircaseHalfStepY + this.secondStaircaseToUpperHeight;
+
+        this.dropDownFromUpperFloorSectionY = this.upperFloorSectionY - 1.0;
+        this.dropDownFromUpperFloorSectionPathZLength = 0.5;
+        this.dropDownFromUpperFloorSectionZLength = this.trackWidth + this.dropDownFromUpperFloorSectionPathZLength;
+        this.dropDownFromUpperFloorSectionZCentre = this.trackZCentre + this.dropDownFromUpperFloorSectionPathZLength;
+
+        this.pathFromDropDownXStart = this.upperFloorSectionXStart + this.upperFloorSectionXLength;
+        this.pathFromDropDownZCentre = this.trackZCentre + this.trackWidth + this.dropDownFromUpperFloorSectionPathZLength;
+        this.pathFromDropDownXLength = 4.0;
+
+
+        this.upperFloorSection              =   new FloorPiece( this.gameWorld, 
+                                                                [ this.upperFloorSectionXStart, this.upperFloorSectionY, this.trackZCentre ],
+                                                                [ this.upperFloorSectionXLength, this.mazePlatformThickness, this.trackWidth ],
+                                                                this.colorHue
+                                                              );
+
+        this.dropDownFromUpperFloorSection      =   new FloorPiece( this.gameWorld, 
+                                                                    [ this.upperFloorSectionXStart, this.dropDownFromUpperFloorSectionY, this.dropDownFromUpperFloorSectionZCentre ],
+                                                                    [ this.upperFloorSectionXLength, this.mazePlatformThickness, this.dropDownFromUpperFloorSectionZLength ],
+                                                                    this.colorHue
+                                                                );
+
+        this.pathFromDropDown                   =   new FloorPiece( this.gameWorld,
+                                                                    [ this.pathFromDropDownXStart, this.dropDownFromUpperFloorSectionY, this.pathFromDropDownZCentre ],
+                                                                    [ this.pathFromDropDownXLength, this.mazePlatformThickness, this.dropDownFromUpperFloorSectionPathZLength ],
+                                                                    this.colorHue
+                                                                  );
+
+        ///////////////////////////////////////
+        ///////////////// TUBE ////////////////
+        ///////////////////////////////////////
+
+        this.tubeWallThickness = 0.10;
+        this.tubeWallLength = 1.0;
+        this.tubeWallHeight = 0.5
+        this.tubeRaisedWallY = this.dropDownFromUpperFloorSectionY + this.tubeWallHeight;
+        this.tubeDropLength = 10.0;
+
+        this.tubeBackWallXStart = this.pathFromDropDownXStart + this.pathFromDropDownXLength - this.tubeWallThickness;
+        this.tubeBackWallZCentre = this.pathFromDropDownZCentre - this.dropDownFromUpperFloorSectionPathZLength - this.tubeWallLength;
+
+        this.tubeLeftWallXStart = this.tubeBackWallXStart - ( 2 * this.tubeWallLength );
+        this.tubeLeftWallZCentre = this.pathFromDropDownZCentre - this.dropDownFromUpperFloorSectionPathZLength - ( 2 * this.tubeWallLength ) + ( this.tubeWallThickness / 2 );
+
+        this.tubeRightWallZCentre = this.pathFromDropDownZCentre - this.dropDownFromUpperFloorSectionPathZLength + ( this.tubeWallThickness / 2 );
+
+        this.tubeFrontWallXStart = this.tubeBackWallXStart - ( 2 * this.tubeWallLength ) - this.tubeWallThickness;
+
+        this.tubeBackWall      =   new FloorPiece( this.gameWorld, 
+                                                    [ this.tubeBackWallXStart, this.tubeRaisedWallY, this.tubeBackWallZCentre ], 
+                                                    [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeWallLength ],
+                                                    this.colorHue
+                                                  );
+        this.tubeLeftWall       =   new FloorPiece( this.gameWorld, 
+                                                    [ this.tubeLeftWallXStart, this.tubeRaisedWallY, this.tubeLeftWallZCentre ], 
+                                                    [ ( 2 * this.tubeWallLength ) , this.tubeDropLength + this.tubeWallHeight, ( this.tubeWallThickness / 2 ) ],
+                                                    this.colorHue
+                                                  );
+        this.tubeRightWall      =   new FloorPiece( this.gameWorld, 
+                                                    [ this.tubeLeftWallXStart, this.dropDownFromUpperFloorSectionY - this.mazePlatformThickness, this.tubeRightWallZCentre ], 
+                                                    [ ( 2 * this.tubeWallLength ) , this.tubeDropLength - this.mazePlatformThickness, ( this.tubeWallThickness / 2 ) ],
+                                                    this.colorHue
+                                                  );
+        this.tubeFrontWall      =   new FloorPiece( this.gameWorld, 
+                                                    [ this.tubeFrontWallXStart, this.tubeRaisedWallY, this.tubeBackWallZCentre ], 
+                                                    [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeWallLength ],
+                                                    this.colorHue
+                                                  );
+
+
+
+        //////////////////////////////////////
+        ////////// LEVEL COMPLETE ////////////
+        //////////////////////////////////////
+
+        this.levelCompletePlatformXStart = this.tubeFrontWallXStart + this.tubeWallThickness;
+        this.levelCompletePlatformXLength = 2 * this.tubeWallLength;
+        this.levelCompletePlatformThickness = 0.5;
+        this.levelCompletePlatformY = this.dropDownFromUpperFloorSectionY - this.tubeDropLength + this.levelCompletePlatformThickness
+        this.levelCompleteZLength = this.tubeWallLength -  ( this.tubeWallThickness / 2 );
+        this.levelCompleteZCentre = this.pathFromDropDownZCentre - this.dropDownFromUpperFloorSectionPathZLength - this.tubeWallLength + ( this.tubeWallThickness / 4 );
+
+        this.levelCompletePlatform = new LevelCompletePlatform( this.gameWorld, 
+                                                                this.player, 
+                                                                [ this.levelCompletePlatformXStart,
+                                                                  this.levelCompletePlatformY,
+                                                                  this.levelCompleteZCentre
+                                                                ], 
+                                                                [ this.levelCompletePlatformXLength,
+                                                                  this.levelCompletePlatformThickness,
+                                                                  this.levelCompleteZLength
+                                                                ]
+                                                               );
+            
+
+
 
         // temporary lighting
 
@@ -693,7 +947,7 @@ export default class level {
 
 
         this.gameWorld.scene.add( this.templight );
-        this.gameWorld.scene.add( this.templightbody );
+        this.gameWorld.scene.add( this.templightbody ); 
 
     }
 
@@ -778,6 +1032,7 @@ export default class level {
         this.currentCameraIndex = this.gameWorld.firstPersonCameraIndex;                // update currentCameraIndex
         this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];     // switch to first person camera
         this.player.playerControls.turnOnMovement();                                    // turn on player movement
+        this.player.playerControls.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
 
     }
 
@@ -787,6 +1042,7 @@ export default class level {
         this.currentCameraIndex = this.gameWorld.thirdPersonCameraIndex;                // update currentCameraIndex
         this.currentCamera = this.gameWorld.cameraArray[this.currentCameraIndex];       // switch to third person camera
         this.player.playerControls.turnOffMovement();                                   // turn off player movement
+        this.player.playerControls.cameraController.pointerSpeed = 0;                   // turn off mouse movement
 
     }
 
@@ -843,13 +1099,13 @@ export default class level {
 
             this.screen?.updateScanlines( this.delta );                 // update scanline animation if screen exists
 
-            this.hud.updateDashProgress( this.player.playerControls.dashProgress )  // update dash cooldown in hud
+            this.hud.updateDashProgress( this.player.playerControls.dashRechargeProgress )  // update dash cooldown in hud
 
             this.gameWorld.physicsWorld.stepSimulation( this.delta, 10 );    //  update physics sim by delta
 
             this.gameWorld.updateRigidBodyMeshToSimulation();           // update rigid bodies mesh position according to physics simulation
 
-            this.player.playerControls.updatePlayerMotion( this.gameWorld );    //  move player according to user input
+            this.player.playerControls.updatePlayerMotion( this.gameWorld, this.delta );    //  move player according to user input
         
             this.checkPlayerCollisions();
 

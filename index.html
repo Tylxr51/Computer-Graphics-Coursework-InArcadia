@@ -39,21 +39,21 @@
         <!-- js will write value here -->
       </div>
 
-      <button id="stationary-is-toggle-button" class="btn">Stationary is Toggle</button>
+      <div class="btn-with-text">
+        <button id="stationary-is-toggle-button" class="btn">Stationary is Toggle</button>
+        <span class="btn-description"> (turns off sprint when stop moving) </span>
+      </div>
       <div id="stationary-is-toggle-value">
         <!-- js will write value here -->
       </div>
-      <p style='color:grey'>
-        (turns off sprinting when you stop moving)
-      </p>
 
-      <button id="is-flicker-on-button" class="btn">Flicker</button>
+      <div class="btn-with-text">
+        <button id="is-flicker-on-button" class="btn">Flicker</button>
+        <span class="btn-description"> (turns off screen flicker effect) </span>
+      </div>
       <div id="is-flicker-on-value">
         <!-- js will write value here -->
       </div>
-      <p style='color:grey'>
-        (turns off screen flicker effect)
-      </p>
 
       <button id="toggle-debug-button" class="btn">Debug Mode</button>
       <div id="toggle-debug-value">
@@ -124,24 +124,26 @@
 
       <h1> Paused </h1>
       <br></br>
+
       <button id="resume-button" class="btn">Resume</button>
-      <br>
-        <div id="resume-status">
-          <!-- menu will write 'Resuming...' here when resume button is clicked -->
-        </div>
-      </br>
+      <div id="resume-status">
+        <!-- menu will write 'Resuming...' here when resume button is clicked -->
+      </div>
       <button id="exit-game-paused-button" class="btn">Main Menu</button>
 
     </div>
 
+    
     <div id="dead-menu" class="game-menu-style">
 
       <h1> You died :/ </h1>
       <br></br>
+
       <button id="respawn-button" class="btn">Respawn</button>
       <button id="exit-game-dead-button" class="btn">Main Menu</button>
 
     </div>
+
 
     <div id="level-complete-menu" class="game-menu-style">
 

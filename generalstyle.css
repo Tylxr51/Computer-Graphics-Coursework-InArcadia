@@ -1,3 +1,31 @@
+/* 
+.btn {
+
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+
+    justify-content: center;
+
+    font-family: monospace;
+
+}
+
+.btn-description {
+  color: #888;              
+  font-size: 0.9em;
+}
+ */
+
+.btn-with-text {
+
+    position: relative;
+    display: flex;
+    justify-content: center; /* centers the button */
+    align-items: center;
+
+}
+
+
 .btn {
 
     margin-top: 0.5em;
@@ -8,10 +36,20 @@
 }
 
 
+.btn-description {
+
+    position: absolute;
+    transform: translateX(20em);
+
+    font-size: 0.9em;
+    color: grey;
+    white-space: nowrap;
+
+}
+
+
 h1 {
 
     margin-bottom: 1em;
-
-    font-size: 36px;
 
 }

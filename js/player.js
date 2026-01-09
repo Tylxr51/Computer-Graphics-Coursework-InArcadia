@@ -165,11 +165,11 @@ class PlayerControls {
 
         // set fov variables
         this.currentFOV;
-        this.FOVWalkRunChangeSpeed = 0.3;      // how quickly FOV changes when player starts/stops sprinting
-        this.FOVDashChangeSpeed = 0.1;
+        this.FOVWalkRunChangeSpeed = 10;      // how quickly FOV changes when player starts/stops sprinting
+        this.FOVDashChangeSpeed = 8;
 
         // set movement speed variables
-        this.walkSpeed = 6 / 100;
+        this.walkSpeed = 3;
         this.runSpeed = 1.7 * this.walkSpeed;
         this.dashSpeed = 10 * this.walkSpeed;
         this.currentDashSpeed = this.dashSpeed;
@@ -318,14 +318,7 @@ class PlayerControls {
     }
 
     // function that is called each gameloop that checks if player is dashing
-    dashLogic() {
-
-        // get value of cooldown timer each gameloop
-        this.timeSinceDash = this.dashTimer.getElapsedTime();
-        this.dashProgress =  THREE.MathUtils.clamp( ( this.timeSinceDash / dashCooldown ), 0, 1 ) * 100
-
-        if ( this.dashProgress < 100 ) { this.canDash = false }
-        else { this.canDash = true };
+    dashLogic( delta ) {
 
         // initiate dash if key has just been pressed
         if ( this.startDash ) {
@@ -343,28 +336,33 @@ class PlayerControls {
             this.dashTimer.start();
 
         };
+
+        // get value of cooldown timer each gameloop
+        this.timeSinceDash = this.dashTimer.getElapsedTime();
+        this.dashRechargeProgress =  THREE.MathUtils.clamp( ( this.timeSinceDash / dashCooldown ), 0, 1 ) * 100
+
+        if ( this.dashRechargeProgress < 100 ) { this.canDash = false }
+        else { this.canDash = true };
+
         
         // if not dashing then return
         if ( !this.dash ) { return };
         
-        // alter FOV change speed whether sprinting or walking so not jarring
-        if ( this.sprint ) { this.FOVDashChangeSpeed = 0.3 }
-        else  { this.FOVDashChangeSpeed = 0.1 }
         
         // only increase fov for a short period so it feels like a short and quick acceleration
-        if ( this.dashTimer.getElapsedTime() < 0.07 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, this.FOVDashChangeSpeed ) };
+        if ( this.dashTimer.getElapsedTime() < 0.07 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, 1 - Math.exp( - this.FOVDashChangeSpeed * delta ) ) };
 
         // set movement speed to dash speed
         this.movementSpeed = this.currentDashSpeed;
 
         // smoothly decrease dash speed back to normal
-        this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 0.1 );
+        this.currentDashSpeed = THREE.MathUtils.lerp( this.currentDashSpeed, this.walkSpeed, 1 - Math.exp( - delta ) );
 
         // set the movement direction to the dash direction that was stored at the start of the dash
         this.movementDirection.copy( this.dashDirection );
 
-        // if speed is within a specified range of walking speed then stop dash
-        if ( this.currentDashSpeed < this.walkSpeed + (( this.dashSpeed - this.walkSpeed ) / 2) ) {
+        // stops dash after amount of time has passed
+        if ( this.timeSinceDash >= 0.1 ) {
             this.dash = false;
             this.currentDashSpeed = this.dashSpeed;
             this.movementSpeed = this.walkSpeed;
@@ -373,7 +371,7 @@ class PlayerControls {
 
     }
 
-    sprintLogic() {
+    sprintLogic( delta ) {
 
         // set default movementSpeed and get currentFOV
         this.movementSpeed = this.walkSpeed;
@@ -390,7 +388,7 @@ class PlayerControls {
         // reduce FOV when stationary
         if ( this.scaledMovementDirection.length() === 0 ) {
 
-            this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, this.FOVWalkRunChangeSpeed );
+            this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, 1 - Math.exp( - this.FOVWalkRunChangeSpeed * delta ) );
 
         }
 
@@ -400,20 +398,20 @@ class PlayerControls {
             if ( this.sprint ) {
 
                 this.movementSpeed = this.runSpeed;
-                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, runFOV, this.FOVWalkRunChangeSpeed );
+                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, runFOV, 1 - Math.exp( - this.FOVWalkRunChangeSpeed * delta ) );
 
             }
             
             // decrease FOV is moving but not sprinting
             else {
 
-                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, this.FOVWalkRunChangeSpeed );
+                this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, 1 - Math.exp( - this.FOVWalkRunChangeSpeed * delta ) );
             
             }
         }
     }
 
-    updatePlayerMotion( gameWorld ) {
+    updatePlayerMotion( gameWorld, delta ) {
         
         // get FOV
         this.currentFOV = this.camera.fov;
@@ -434,7 +432,7 @@ class PlayerControls {
         
         
         // handle sprinting logic
-        this.sprintLogic();
+        this.sprintLogic( delta );
         
         // calculate movementDirection
         this.movementDirection.set(0, 0, 0);
@@ -443,10 +441,10 @@ class PlayerControls {
         this.movementDirection.normalize();
         
         // handle dash logic
-        this.dashLogic();
+        this.dashLogic( delta );
         
         // scale movement according to movement speed
-        this.scaledMovementDirection.copy( this.movementDirection ).multiplyScalar( this.movementSpeed );
+        this.scaledMovementDirection.copy( this.movementDirection ).multiplyScalar( this.movementSpeed * delta );
         this.tmpScaledMovementDirection.setValue( this.scaledMovementDirection.x, 
             this.scaledMovementDirection.y, 
             this.scaledMovementDirection.z

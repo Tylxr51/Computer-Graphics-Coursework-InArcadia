@@ -238,31 +238,6 @@ export class SpawnArea {
 }
 
 
-// WHAT THIS CLASS DOES AND WHY:
-//
-// FLOORPIECE SPAWNS A IMMOVABLE CUBOID (MESH AND RIGIDBODY) TO ACT AS THE FLOOR.
-//
-// IT TAKES:
-//      GAMEWORLD FOR SPAWNING
-//      POSITION = THE MIDPOINT OF THE TOP BACK EDGE OF THE CUBOID
-//      SIZE = ABSOLUTE DISTANCE IN EACH COORDINATE FROM POSITION COORDINATE TO THE RIGHT FRONT BOTTOM VERTEX OF THE CUBOID (ALL VALUES MUST BE POSITIVE)
-// NO ROTATION PARAMETER IS NEEDED AS THE FLOOR PIECES ALL HAVE THE SAME ORIENTATION
-//
-// THE POSITION AND SIZE HAVE BEEN SET UP LIKE THIS TO MAKE IT EASIER TO POSITION THE FLOOR PIECES
-//
-// HERE IS AN EXAMPLE:
-//      ``` new FloorPiece( GameWorld, [ 0, 0, 0 ], [ 4, 3, 1 ] ) ```
-//      
-//      THIS WOULD CREATE A 4x3x2 CUBOID IN GAMEWORLD WITH VERTICES:
-//      [ 0,  0, -1 ]
-//      [ 0,  0,  1 ]
-//      [ 0, -3, -1 ]
-//      [ 0, -3,  1 ]
-//      [ 4,  0, -1 ]
-//      [ 4,  0,  1 ]
-//      [ 4, -3, -1 ]
-//      [ 4, -3,  1 ]
-
 export class Staircase {
 
     constructor( gameWorld, startingPosition, numberOfSteps, stairDepth, stairWidth, colorHue ) {
@@ -311,6 +286,31 @@ export class Staircase {
     }
 
 }
+
+// WHAT THIS CLASS DOES AND WHY:
+//
+// FLOORPIECE SPAWNS A IMMOVABLE CUBOID (MESH AND RIGIDBODY) TO ACT AS THE FLOOR.
+//
+// IT TAKES:
+//      GAMEWORLD FOR SPAWNING
+//      POSITION = THE MIDPOINT OF THE TOP BACK EDGE OF THE CUBOID
+//      SIZE = ABSOLUTE DISTANCE IN EACH COORDINATE FROM POSITION COORDINATE TO THE RIGHT FRONT BOTTOM VERTEX OF THE CUBOID (ALL VALUES MUST BE POSITIVE)
+// NO ROTATION PARAMETER IS NEEDED AS THE FLOOR PIECES ALL HAVE THE SAME ORIENTATION
+//
+// THE POSITION AND SIZE HAVE BEEN SET UP LIKE THIS TO MAKE IT EASIER TO POSITION THE FLOOR PIECES
+//
+// HERE IS AN EXAMPLE:
+//      ``` new FloorPiece( GameWorld, [ 0, 0, 0 ], [ 4, 3, 1 ] ) ```
+//      
+//      THIS WOULD CREATE A 4x3x2 CUBOID IN GAMEWORLD WITH VERTICES:
+//      [ 0,  0, -1 ]
+//      [ 0,  0,  1 ]
+//      [ 0, -3, -1 ]
+//      [ 0, -3,  1 ]
+//      [ 4,  0, -1 ]
+//      [ 4,  0,  1 ]
+//      [ 4, -3, -1 ]
+//      [ 4, -3,  1 ]
 
 export class FloorPiece {
     

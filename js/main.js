@@ -84,6 +84,7 @@ async function main() {
         launchLevel();
 
     }
+    
     let onExitLevel = () => { exitLevel(); }        // function called on level exit
 
     // make listeners
