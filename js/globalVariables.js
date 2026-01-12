@@ -18,6 +18,8 @@ let levelIndex;
 let currentLevelAbortController;
 let currentLevelEnvironment;
 
+let isPlayerGLTFInit = false;
+
 let toggleSprint = true;        // set default to true, can be changed in settings
 let stationaryIsToggle = true;
 
@@ -50,4 +52,9 @@ let textureFileNames = [
     'if_only_camera_angle'
 ];
 
+let GLTFFileNames = [
+    'player_character'
+];
+
 let loadedTextures = {};
+let loadedGLTFs = {};

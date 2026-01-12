@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import Level from '/js/levelEnvironment.js'
+import Level from '/js/levelManager.js'
 import { MainMainMenu, LevelsMainMenu, SettingsMainMenu, ControlsMainMenu } from '/js/menus.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
-let AmmoLib
+let AmmoLib;
+let gltfLoader;
 let mainMenu;
 let levelsMenu;
 let settingsMenu;
@@ -89,11 +91,35 @@ async function loadTextures() {
 
 }
 
+async function awaitLoader( key, path ) {
+
+    let GLTF = await gltfLoader.loadAsync( path );
+    loadedGLTFs[ key ] = GLTF;
+
+}
+
+async function loadModels() {
+
+    gltfLoader = new GLTFLoader();
+
+    GLTFFileNames.forEach( fileName => {
+
+        let GLTFKey = fileName;
+        let GLTFPath = `/assets/${ fileName }.glb`;
+
+        awaitLoader( GLTFKey, GLTFPath )
+
+        }
+    );
+
+}
+
 // load physics engine and show main menu
 async function main() {
     
     loadPackages();
     loadTextures();
+    loadModels();
 
     document.body.style.margin = '0';       // remove borders around canvas
 

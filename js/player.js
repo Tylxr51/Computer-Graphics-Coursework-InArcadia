@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js'; 
+import { PlayerGLTF } from '/js/objectSpawner.js'
 
 export default class Player {
     
@@ -45,7 +46,7 @@ export default class Player {
 
 
 
-        //////////// PLAYER MESH ////////////
+        ////////////// PLAYER WIREFRAME MESH ///////////////
 
         // set up wireframe capsule mesh to represent player (used for debugging purposes, set to transparent when debugger is off)
         this.playerGeometry = new THREE.CapsuleGeometry( this.playerRadius, this.playerHeight, 2, 8, 1 );
@@ -55,6 +56,14 @@ export default class Player {
         this.playerWireframe.opacity = Number( debug );     // have to set opacity to 0 as well to make it transparent
 
         this.playerMesh = new THREE.Mesh( this.playerGeometry, this.playerWireframe );
+
+
+
+        ///////////////// PLAYER GLTF MESH /////////////////
+
+        this.playerGLTFMesh = new PlayerGLTF( this.gameWorld );
+
+
 
         //////////// INITIALISE PLAYER CONTROLS ////////////
 
@@ -465,6 +474,9 @@ class PlayerControls {
                                              this.ghostLocation.y(), 
                                              this.ghostLocation.z() 
                                             );
+
+        // update player GLTF mesh position according to physics simulation
+        this.player.playerGLTFMesh.updatePlayerGLTFMeshLocation( this.lookDirection, [ this.ghostLocation.x(), this.ghostLocation.y(), this.ghostLocation.z() ] )
 
         // update camera location to player location
         gameWorld.firstPersonCamera.position.set( this.ghostLocation.x(),

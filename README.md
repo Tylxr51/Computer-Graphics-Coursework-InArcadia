@@ -30,3 +30,8 @@
 ### Assets
 
 - https://pngtree.com/freebackground/a-vibrant-arcade-filled-with-retro-video-game-machines-and-neon-lights_16339792.html
+
+
+#### Blender 
+
+- https://www.youtube.com/watch?v=O6HQhs-gk50

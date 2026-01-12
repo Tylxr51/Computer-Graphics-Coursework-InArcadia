@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import World from '/js/buildWorld.js'
 import Player from '/js/player.js'
-import OverheadLights from '/js/lighting.js';  
-import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
+import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
 import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu, LevelCompleteGameMenu, HUD } from '/js/menus.js'
 
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
@@ -118,12 +117,6 @@ export default class level {
 
     // function that chooses which level to load
     chooseLevelScene( levelIndex ) {
-        
-        //////////////////////////////////////
-        /////////////// SCREEN ///////////////
-        //////////////////////////////////////
-
-        this.screen = new Screen( this.gameWorld )
 
         switch ( levelIndex ) {
         
@@ -154,11 +147,20 @@ export default class level {
         this.defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
 
 
+        
         //////////////////////////////////////
         /////////// OUT OF BOUNDS ////////////
         //////////////////////////////////////
 
         this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
+
+
+
+        //////////////////////////////////////
+        /////////////// SCREEN ///////////////
+        //////////////////////////////////////
+
+        this.screen = new Screen( this.gameWorld );
 
 
 
@@ -596,7 +598,20 @@ export default class level {
         this.defaultImagePlateSize = [ 4, 4 ];
         this.defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
 
+        //////////////////////////////////////
+        /////////// OUT OF BOUNDS ////////////
+        //////////////////////////////////////
+
         this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
+
+
+
+        //////////////////////////////////////
+        /////////////// SCREEN ///////////////
+        //////////////////////////////////////
+
+        this.screen = new Screen( this.gameWorld )
+
 
 
         //////////////////////////////////////
@@ -1257,6 +1272,7 @@ export default class level {
         this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];     // switch to first person camera
         this.player.playerControls.turnOnMovement();                                    // turn on player movement
         this.player.playerControls.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
+        this.player.playerGLTFMesh?.despawnPlayerGLTFMesh();
 
     }
 
@@ -1267,6 +1283,7 @@ export default class level {
         this.currentCamera = this.gameWorld.cameraArray[this.currentCameraIndex];       // switch to third person camera
         this.player.playerControls.turnOffMovement();                                   // turn off player movement
         this.player.playerControls.cameraController.pointerSpeed = 0;                   // turn off mouse movement
+        this.player.playerGLTFMesh?.spawnPlayerGLTFMesh();
 
     }
 

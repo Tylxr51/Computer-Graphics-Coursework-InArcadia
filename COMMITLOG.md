@@ -2,6 +2,11 @@
 
 #### 12.01.26
 
+- Added in GLTF Loading function
+- Created a player character in blender and added it in for third person camera
+
+#### 12.01.26
+
 - Added in-game guiding text using hand-drawn images
 - Added more sophisticated texture loading function
 - Changed third person camera to perspective

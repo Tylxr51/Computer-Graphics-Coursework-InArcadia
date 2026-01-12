@@ -2,34 +2,102 @@ import * as THREE from 'three';
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
-export class RigidBody {
-    constructor() {
+
+function initPlayerGLTFMaterial( mesh ) {
+
+    let colorHue = 0.1;
+    let colorLightness = 0.4;   
+    
+    let color = new THREE.Color();
+
+    mesh.children[0].geometry = mesh.children[0].geometry.toNonIndexed();      // ensure each face has unique vertices
+
+    let position = mesh.children[0].geometry.attributes.position;
+    let colors = [];
+    let yrange = [];
+
+    // find ymax and ymin to normalize y
+    for ( let i = 0, l = position.count; i < l; i ++ ) { yrange.push( position.getY( i ) ) }
+
+    let ymax = Math.max(...yrange)
+    let ymin = Math.min(...yrange)
+
+    for ( let i = 0, l = position.count; i < l; i ++ ) {
+
+        // normalise y coord
+        let y = ( position.getY( i ) - ymin ) / ( ymax - ymin );
+        let gradientMap = - 5 * ( y ** 2 - ( 0.2 * y ) - 0.4 ) ** 2 + 1
+
+        color.setHSL( 1 - ( 0.5 * gradientMap ) * ( colorHue + Math.random() * 0.2 ) , 
+                        0.75, 
+                        ( gradientMap ) * ( colorLightness + Math.random() * 0.5 ), 
+                        THREE.SRGBColorSpace 
+                            );
+
+        colors.push( color.r, color.g, color.b );
+
     }
 
-    createBox(size, mass, position, quaternion) {
-        this.transform = new Ammo.btTransform();
-        this.transform.setIdentity();
-        this.transform.setOrigin( new Ammo.btVector3( position.x, position.y, position.z) );
-        this.transform.setRotation( new Ammo.btQuaternion( quaternion.x, quaternion.y, quaternion.z, quaternion.w) );
-        this.motionState = new Ammo.btDefaultMotionState( this.transform );
 
-        const btSize = new Ammo.btVector3( size.x * 0.5, size.y * 0.5, size.z * 0.5 );
-        this.shape = new Ammo.btBoxShape( btSize );
-        this.shape.setMargin( 0.05 );
+    mesh.children[0].geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
-        this.intertia = new Ammo.btVector3( 0, 0, 0 );
-        if (mass > 0) {
-            this.shape.calculateLocalInertia( mass, this.intertia );
-        }
 
-        this.info = new Ammo.btRigidBodyConstructionInfo( 
-            mass, 
-            this.motionState, 
-            this.shape, 
-            this.intertia );
-        this.body = new Ammo.btRigidBody( this.info );
+    mesh.children[0].material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness : 0.4, roughness : 0.4, vertexColors: true } );
+    mesh.children[0].material.castShadow = true;
+    mesh.children[0].material.receiveShadow = true;
 
-        Ammo.destroy( btSize );
+    isPlayerGLTFInit = true;
+
+}
+
+export class PlayerGLTF {
+        
+    constructor( gameWorld ) {
+
+        this.playerGLTFMesh = loadedGLTFs['player_character'].scene;  
+
+        if ( !isPlayerGLTFInit ) { initPlayerGLTFMaterial( this.playerGLTFMesh ) }
+
+        this.gameWorld = gameWorld;
+
+        this.playerGLTFMeshPosition;
+        this.playerGLTFMeshLookDirection
+        this.playerGLTFMeshRotationMatrix;
+
+    }
+
+    updatePlayerGLTFMeshLocation( lookDirection, position ) {
+
+        this.playerGLTFMeshPosition = position;
+        this.playerGLTFMeshLookDirection = lookDirection;
+
+        this.calculateRotationMatrix()
+
+        this.playerGLTFMesh.position.set( this.playerGLTFMeshPosition[0], this.playerGLTFMeshPosition[1], this.playerGLTFMeshPosition[2] );
+        this.playerGLTFMesh.quaternion.setFromRotationMatrix( this.playerGLTFMeshRotationMatrix );
+
+    }
+
+    calculateRotationMatrix( ) {
+        
+        this.playerGLTFMeshNormalTarget = new THREE.Vector3( this.playerGLTFMeshLookDirection.x, 0, this.playerGLTFMeshLookDirection.z ).normalize();
+        this.playerGLTFMeshUp = new THREE.Vector3( 0, 1, 0 ).normalize();
+        this.playerGLTFMeshRight = new THREE.Vector3().crossVectors( this.playerGLTFMeshUp, this.playerGLTFMeshNormalTarget ).normalize();
+        this.playerGLTFMeshRotationMatrix = new THREE.Matrix4().makeBasis(this.playerGLTFMeshRight, this.playerGLTFMeshUp, this.playerGLTFMeshNormalTarget )
+    
+    }
+
+    spawnPlayerGLTFMesh() {
+
+        this.gameWorld.scene.add( this.playerGLTFMesh );
+
+    }
+
+    despawnPlayerGLTFMesh() {
+
+
+        this.gameWorld.scene.remove( this.playerGLTFMesh );
+
     }
 }
 
