@@ -33,6 +33,23 @@ export class RigidBody {
     }
 }
 
+export class ImagePlate {
+
+    constructor( gameWorld, size, position, rotationMatrix, texture ) {
+        
+        this.imagePlateGeometry = new THREE.PlaneGeometry( size[0], size[1] );
+        this.imagePlateMaterial = new THREE.MeshBasicMaterial( { map: loadedTextures[texture], transparent: true, alphaTest: 0.3 } );
+
+        this.imagePlateMesh = new THREE.Mesh( this.imagePlateGeometry, this.imagePlateMaterial );
+
+        this.imagePlateMesh.position.set( position[0], position[1], position[2] );
+        this.imagePlateMesh.quaternion.setFromRotationMatrix( rotationMatrix );
+
+        gameWorld.scene.add( this.imagePlateMesh );
+    }
+
+}
+
 export class triggerPlatform {
 
     constructor( gameWorld, player, position, size, contactEvent, debugColor ) {
@@ -136,9 +153,6 @@ export class Screen {
         
         initRectAreaLight();
         
-        // load texture to go on screen
-        this.screenTexture = new THREE.TextureLoader().load('./assets/screenTexture.png')
-        
         // screen size
         this.screenWidth = 144.0;
         this.screenHeight = 90.0;
@@ -158,7 +172,7 @@ export class Screen {
                            shapeHeight : { value : this.screenHeight },
                            uTime : { value : 0 },
                            uColor : { value : new THREE.Color( 0xffffff ) },
-                           uScreen : { value : this.screenTexture },
+                           uScreen : { value : loadedTextures['image_on_screen'] },
                            isFlickerOn : {value : Number( isFlickerOn ) }
                          }
             } 
@@ -370,6 +384,7 @@ export class FloorPiece {
 
     }
 
+    // refactor
     createFloorMesh() {
 
         this.floorGeometry = new THREE.BoxGeometry( this.floorSize.x, 
@@ -378,10 +393,6 @@ export class FloorPiece {
                                                   );
                                                   
         
-
-
-
-
         // colour variation
 
         this.color = new THREE.Color();

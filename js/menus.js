@@ -1,3 +1,11 @@
+function writeVariable( HTMLLocation, variable ) {
+    if ( typeof(variable) == 'boolean' ) {
+        variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) );
+    }
+    HTMLLocation.innerHTML = variable;
+}
+
+
 // base class for menu screens
 class Menu {
     

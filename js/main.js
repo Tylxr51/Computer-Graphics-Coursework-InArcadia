@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import Level from '/js/levelEnvironment.js'
 import { MainMainMenu, LevelsMainMenu, SettingsMainMenu, ControlsMainMenu } from '/js/menus.js'
 
@@ -46,7 +47,7 @@ function exitLevel() {
 
 async function loadShader( url ) {
 
-  const response = await fetch( url );
+  let response = await fetch( url );
 
   return await response.text();
 
@@ -61,13 +62,38 @@ async function loadPackages() {
     
 
     Ammo = AmmoLib;
-    
+
+}
+
+async function loadTextures() {
+
+    let textureLoader = new THREE.TextureLoader();
+
+    textureFileNames.forEach( fileName => {
+
+        let textureKey = fileName;
+        let texturePath = `/assets/${ fileName }.png`;
+
+        let texture = textureLoader.load(texturePath);
+
+        // Performance-related settings
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.anisotropy = 1;
+
+        loadedTextures[ textureKey ] = texture;
+
+        }
+    );
+
 }
 
 // load physics engine and show main menu
 async function main() {
     
     loadPackages();
+    loadTextures();
 
     document.body.style.margin = '0';       // remove borders around canvas
 

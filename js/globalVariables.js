@@ -30,9 +30,24 @@ let dashFOV = runFOV + 15;
 
 let mouseControlsSensitivity = 0.7;
 
-function writeVariable( HTMLLocation, variable ) {
-    if ( typeof(variable) == 'boolean' ) {
-        variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) );
-    }
-    HTMLLocation.innerHTML = variable;
-}
+let textureFileNames = [
+    'image_on_screen',
+    'press_space_to_jump',
+    'wasd',
+    'space_+_w',
+    'hold_shift_to_sprint',
+    'press_shift_to_sprint',
+    'press_r_to_dash',
+    'dash_arrows',
+    'press_t_to_switch_cameras',
+    'tube_skull_and_crossbones',
+    'tube_spikes',
+    'the_maze',
+    'straight_arrow',
+    'nothing_down_here',
+    'arcing_arrow_left',
+    'arcing_arrow_right',
+    'if_only_camera_angle'
+];
+
+let loadedTextures = {};

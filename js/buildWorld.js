@@ -5,17 +5,6 @@ export default class World {
     // initialise game world
     constructor(gravityVector, abortController) {
 
-        // scene and renderer setup
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0x000000 );
-		this.scene.fog = new THREE.Fog( 0x000000, 0, 1000 );
-
-        this.renderer = new THREE.WebGLRenderer( { antialias: true } );
-        this.renderer.setSize( window.innerWidth, window.innerHeight );
-        this.renderer.setPixelRatio( window.devicePixelRatio );
-        document.body.appendChild( this.renderer.domElement );              // add canvas to document body
-
-
 
         // first person camera setup
         this.firstPersonCameraWalkFOV = 75;
@@ -28,37 +17,31 @@ export default class World {
                                                               this.firstPersonCameraFar 
                                                             );
 
-
-
         // PERSPECTIVE THIRD PERSON CAMERA
-        // this.thirdPersonCameraWalkFOV = 50;
-        // this.thirdPersonCameraAspect = window.innerWidth / window.innerHeight;
-        // this.thirdPersonCameraNear = 0.1;
-        // this.thirdPersonCameraFar = 1000;
-        // this.thirdPersonCamera = new THREE.PerspectiveCamera( 
-        //     this.thirdPersonCameraWalkFOV, 
-        //     this.thirdPersonCameraAspect, 
-        //     this.thirdPersonCameraNear, 
-        //     this.thirdPersonCameraFar 
-        // );
-
-
-        // ORTHOGRAPHIC THIRD PERSON CAMERA
-        this.thirdPersonCameraLeft;
-        this.thirdPersonCameraRight;
-        this.thirdPersonCameraTop;
-        this.thirdPersonCameraBottom;
+        this.thirdPersonCameraWalkFOV = 50;
+        this.thirdPersonCameraAspect = window.innerWidth / window.innerHeight;
         this.thirdPersonCameraNear = 0.1;
         this.thirdPersonCameraFar = 1000;
-        this.thirdPersonCameraZoomOut = 0.025;
-        this.thirdPersonCameraDistanceFromScene = 10;
-        this.thirdPersonCamera = new THREE.OrthographicCamera( this.thirdPersonCameraLeft,
-                                                               this.thirdPersonCameraRight,
-                                                               this.thirdPersonCameraTop,
-                                                               this.thirdPersonCameraBottom,
-                                                               this.thirdPersonCameraNear,
-                                                               this.thirdPersonCameraFar
-                                                            );
+        this.thirdPersonCameraDistanceFromScene = 15;
+        this.thirdPersonCamera = new THREE.PerspectiveCamera( 
+            this.thirdPersonCameraWalkFOV, 
+            this.thirdPersonCameraAspect, 
+            this.thirdPersonCameraNear, 
+            this.thirdPersonCameraFar 
+        );
+
+
+
+        // scene and renderer setup
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color( 0x000000 );
+		this.scene.fog = new THREE.Fog( 0x000000, 0, 30 );
+
+        this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setPixelRatio( window.devicePixelRatio );
+        this.renderer.toneMapping = THREE.ReinhardToneMapping;
+        document.body.appendChild( this.renderer.domElement );              // add canvas to document body
 
         // set camera aspect ratios
         this.setCameraAspectRatios();
@@ -84,14 +67,9 @@ export default class World {
 
     setCameraAspectRatios() {
 
-        // set first person camera aspect ratio
+        // set camera aspect ratios
         this.firstPersonCamera.aspect = window.innerWidth / window.innerHeight;
-
-        // set third person camera aspect ratio
-        this.thirdPersonCamera.left     = - this.thirdPersonCameraZoomOut * window.innerWidth  / 2;
-        this.thirdPersonCamera.right    =   this.thirdPersonCameraZoomOut * window.innerWidth  / 2;
-        this.thirdPersonCamera.top      =   this.thirdPersonCameraZoomOut * window.innerHeight / 2;
-        this.thirdPersonCamera.bottom   = - this.thirdPersonCameraZoomOut * window.innerHeight / 2;
+        this.thirdPersonCamera.aspect = window.innerWidth / window.innerHeight;
 
         // update cameras        
         this.firstPersonCamera.updateProjectionMatrix();

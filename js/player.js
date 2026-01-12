@@ -473,7 +473,7 @@ class PlayerControls {
                                                 );
 
         gameWorld.thirdPersonCamera.position.set( this.ghostLocation.x(),
-                                                  this.ghostLocation.y() + ( this.player.playerHeight / 2) + 2.5,
+                                                  this.ghostLocation.y() + ( this.player.playerHeight / 2),
                                                   gameWorld.thirdPersonCameraDistanceFromScene
                                                 );
         gameWorld.thirdPersonCamera.lookAt( this.ghostLocation.x(),

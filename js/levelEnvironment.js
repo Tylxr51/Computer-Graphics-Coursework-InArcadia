@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import World from '/js/buildWorld.js'
 import Player from '/js/player.js'
 import OverheadLights from '/js/lighting.js';  
-import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform } from '/js/objectSpawner.js'
+import { RigidBody, FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
 import {InstructionsGameMenu, PauseGameMenu, DeadGameMenu, LevelCompleteGameMenu, HUD } from '/js/menus.js'
 
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
@@ -150,6 +150,9 @@ export default class level {
         this.trackWidth = 2.00;     // width of floorpieces
         this.trackZCentre = 0.00;
 
+        this.defaultImagePlateSize = [ 4, 4 ];
+        this.defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
+
 
         //////////////////////////////////////
         /////////// OUT OF BOUNDS ////////////
@@ -167,6 +170,9 @@ export default class level {
 
         this.spawnPlatformXStart = -0.50;
         
+        this.wasdImagePlateX = this.spawnPlatformXStart + 1.50 + 3.0;
+        this.wasdImagePlateY = this.playerSpawnY - 0.5;
+        
         
         ///// CREATE FLOOR PIECES & DOOR //////
         
@@ -174,6 +180,14 @@ export default class level {
         this.spawnArea = new SpawnArea( this.gameWorld, this.spawnPlatformXStart, this.playerSpawnY, this.playerSize.y, this.trackZCentre )
         
         
+        ///////// CREATE IMAGE PLATE //////////
+
+        this.wasdImagePlate    =   new ImagePlate( this.gameWorld, 
+                                                   this.defaultImagePlateSize, 
+                                                   [ this.wasdImagePlateX, this.wasdImagePlateY, this.trackZCentre ], 
+                                                   this.defaultImageRotationMatrix, 
+                                                   'wasd'
+                                                 );
 
         ///////////////////////////////////////
         //////////// LOWER SECTION ////////////
@@ -189,6 +203,9 @@ export default class level {
         this.walkJumpGapDistance = 1.00;
         this.floorAfterWalkJumpXStart = this.firstFloorXStart + this.firstFloorXLength + this.walkJumpGapDistance;
         this.floorAfterWalkJumpXLength = 7.00;
+
+        this.pressSprintToJumpImagePlateX = this.firstFloorXStart + this.firstFloorXLength + ( this.walkJumpGapDistance / 2 );
+        this.pressSprintToJumpImagePlateY = this.lowerSectionY + 0.6
 
 
         ///////// CREATE FLOOR PIECES /////////
@@ -212,6 +229,16 @@ export default class level {
                                                     );
 
 
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.pressSpaceToJumpImagePlate    =   new ImagePlate( this.gameWorld,
+                                                                this.defaultImagePlateSize,
+                                                                [ this.pressSprintToJumpImagePlateX, this.pressSprintToJumpImagePlateY, this.trackZCentre ], 
+                                                                this.defaultImageRotationMatrix, 
+                                                                'press_space_to_jump'
+                                                            );
+
+
 
         ///////////////////////////////////////
         //////////// UPPER SECTION ////////////
@@ -229,6 +256,17 @@ export default class level {
         this.floorAfterSprintJumpXStart = this.raisedFloorToClimbXStart + this.raisedFloorToClimbXLength + this.sprintJumpGapDistance;
         this.floorAfterSprintJumpXLength = 7.00;
 
+        this.spaceAndWImagePlateX = this.raisedFloorToClimbXStart - 0.2;
+        this.spaceAndWImagePlateY = this.raisedSectionY + 1.50;
+        this.spaceAndWImagePlateNormalTarget = new THREE.Vector3( 0.5, -1, 0 ).normalize();
+        this.spaceAndWImagePlateUp = new THREE.Vector3( 0, -1, 0 ).normalize();
+        this.spaceAndWImagePlateRight = new THREE.Vector3().crossVectors( this.spaceAndWImagePlateUp, this.spaceAndWImagePlateNormalTarget ).normalize();
+        this.spaceAndWImagePlateUpTarget = new THREE.Vector3().crossVectors( this.spaceAndWImagePlateNormalTarget, this.spaceAndWImagePlateRight).normalize();
+        this.spaceAndWImageRotationMatrix = new THREE.Matrix4().makeBasis(this.spaceAndWImagePlateRight, this.spaceAndWImagePlateUpTarget, this.spaceAndWImagePlateNormalTarget )
+        
+        this.shiftToSprintX = this.floorAfterSprintJumpXStart - ( this.sprintJumpGapDistance / 2 )
+        this.shiftToSprintY = this.raisedSectionY + 0.6;
+        this.shiftToSprintTextureString = 'press'.repeat( Number( toggleSprint ) ) + 'hold'.repeat( Number( !toggleSprint ) ) + '_shift_to_sprint';
 
         ///////// CREATE FLOOR PIECES /////////
 
@@ -246,6 +284,23 @@ export default class level {
                                                         [ this.floorAfterSprintJumpXStart, this.raisedSectionY, this.trackZCentre ], 
                                                         [ this.floorAfterSprintJumpXLength, 1.0, this.trackWidth ],
                                                         this.colorHue
+                                                      );
+
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.spaceAndWImagePlate    =   new ImagePlate( this.gameWorld, 
+                                                        this.defaultImagePlateSize, 
+                                                        [ this.spaceAndWImagePlateX, this.spaceAndWImagePlateY, this.trackZCentre ], 
+                                                        this.spaceAndWImageRotationMatrix, 
+                                                        'space_+_w'
+                                                      );
+
+        this.shiftToSprint          =   new ImagePlate( this.gameWorld, 
+                                                        this.defaultImagePlateSize, 
+                                                        [ this.shiftToSprintX, this.shiftToSprintY, this.trackZCentre ], 
+                                                        this.defaultImageRotationMatrix, 
+                                                        this.shiftToSprintTextureString
                                                       );
 
 
@@ -270,6 +325,9 @@ export default class level {
         this.floorBelowDashEntryY = this.raisedSectionY - this.dashGapDrop;
         this.floorBelowDashEntryXLength = 4.00;
 
+        this.pressRToDashX = this.dashGapOpeningXStart - 1.0;
+        this.pressRToDashY = this.raisedSectionY + 0.6;
+
 
         ///////// CREATE FLOOR PIECES /////////
 
@@ -287,6 +345,22 @@ export default class level {
                                                         this.colorHue
                                                     );
 
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.pressRToDash           =   new ImagePlate( this.gameWorld, 
+                                                        this.defaultImagePlateSize, 
+                                                        [ this.pressRToDashX, this.pressRToDashY, this.trackZCentre ], 
+                                                        this.defaultImageRotationMatrix, 
+                                                        'press_r_to_dash'
+                                                      );
+
+        this.dashArrows             =   new ImagePlate( this.gameWorld, 
+                                                        [ 5, 7 ], 
+                                                        [ this.pressRToDashX, this.pressRToDashY - 2.8, this.trackZCentre ], 
+                                                        this.defaultImageRotationMatrix, 
+                                                        'dash_arrows'
+                                                      );
 
 
         ///////////////////////////////////////
@@ -336,8 +410,17 @@ export default class level {
         this.rightFloorBetweenTubesXLength = this.tubeSectionXLength / 8;
         this.rightFloorAfterSecondTubeXLength = this.tubeSectionXLength / 8;
 
-        this.rightFloorBetweenTubesXStart = this.tubeSectionXStart + 4 * (this.tubeSectionXLength / 8)
-        this.rightFloorAfterSecondTubeXStart = this.tubeSectionXStart + 7 * (this.tubeSectionXLength / 8)
+        this.rightFloorBetweenTubesXStart = this.tubeSectionXStart + 4 * (this.tubeSectionXLength / 8 );
+        this.rightFloorAfterSecondTubeXStart = this.tubeSectionXStart + 7 * (this.tubeSectionXLength / 8 );
+
+        this.pressTToSwitchCamerasX = this.tubeSectionXStart + ( this.tubeSectionXLength / 2 ) ;
+        this.pressTToSwitchCamerasY = this.tubeSectionFloorHeight + 1.0;
+
+        this.tubeSkullAndCrossbonesX = this.rightFloorBetweenTubesXStart - ( this.tubeXLength / 2 );
+        this.tubeSkullAndCrossbonesY = this.tubeSectionFloorHeight - 1.5;
+        this.tubeSkullAndCrossbonesZ = this.trackZCentre + ( 2 * this.tubeZLength ) + 0.05;
+        this.tubeSkullAndCrossbonesRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0 ,0 ), 0 );
+        
 
 
         ///////// CREATE FLOOR PIECES //////////
@@ -406,6 +489,29 @@ export default class level {
                                                             this.colorHue
                                                           );
 
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.pressTToSwitchCameras          =   new ImagePlate( this.gameWorld, 
+                                                                this.defaultImagePlateSize, 
+                                                                [ this.pressTToSwitchCamerasX, this.pressTToSwitchCamerasY, this.trackZCentre ], 
+                                                                this.defaultImageRotationMatrix, 
+                                                                'press_t_to_switch_cameras'
+                                                      );
+
+        this.tubeSkullAndCrossbones         =   new ImagePlate( this.gameWorld, 
+                                                                this.defaultImagePlateSize, 
+                                                                [ this.tubeSkullAndCrossbonesX, this.tubeSkullAndCrossbonesY, this.tubeSkullAndCrossbonesZ ], 
+                                                                this.tubeSkullAndCrossbonesRotationMatrix, 
+                                                                'tube_skull_and_crossbones'
+                                                              );
+
+        this.tubeSpikes                     =   new ImagePlate( this.gameWorld, 
+                                                                [ 2.6, 7 ], 
+                                                                [ this.tubeSkullAndCrossbonesX, this.tubeSkullAndCrossbonesY - 3.5, this.tubeSkullAndCrossbonesZ ], 
+                                                                this.tubeSkullAndCrossbonesRotationMatrix, 
+                                                                'tube_spikes'
+                                                              );
+
         // Set up box
         // const boxGeometry = new THREE.BoxGeometry();
         // const boxMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
@@ -448,7 +554,7 @@ export default class level {
 
 
         // Set up lighting
-        const directionalLight = new THREE.DirectionalLight( 0xffffff );
+        const directionalLight = new THREE.DirectionalLight( 0xffaaff, 0.5 );
         directionalLight.position.set( 30, 40, 100 );
         directionalLight.target.position.set( 30, 0, 0 );
         this.gameWorld.scene.add(directionalLight);
@@ -456,7 +562,7 @@ export default class level {
         const dlighthelper = new THREE.DirectionalLightHelper( directionalLight );
         if ( debug ) { this.gameWorld.scene.add( dlighthelper ); }
         
-        const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.3 );
+        const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
         this.gameWorld.scene.add( hemlight );
 
         
@@ -486,6 +592,9 @@ export default class level {
 
         this.trackWidth = 2.00;     // width of floorpieces
         this.trackZCentre = 0.00;
+
+        this.defaultImagePlateSize = [ 4, 4 ];
+        this.defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
 
         this.outOfBoundsPlatform = new OutOfBoundsPlatform( this.gameWorld, this.player );
 
@@ -566,6 +675,9 @@ export default class level {
         this.mazeLeftWallHeight = this.mazeBackWallHeight + this.mazeFrameThickness;
         this.mazeLeftWallZCentre = this.trackZCentre - ( this.trackWidth ) - ( this.mazePlatformThickness / 2 );
 
+        this.theMazeX = this.mazeFrontWallXStart - 0.05;
+        this.theMazeY = this.lowerSectionY + this.mazeOpeningHeight + 1.0;
+
 
 
         ///////// CREATE FLOOR PIECES /////////
@@ -601,6 +713,15 @@ export default class level {
                                                     this.colorHue
                                                   );
 
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.theMaze    =   new ImagePlate( this.gameWorld,
+                                            this.defaultImagePlateSize,
+                                            [ this.theMazeX, this.theMazeY, this.trackZCentre ], 
+                                            this.defaultImageRotationMatrix, 
+                                            'the_maze'
+                                          );
+
 
         ///////////////////////////////////////
         /////////// LOWER SECTION /////////////
@@ -623,6 +744,16 @@ export default class level {
         this.mazeLowerSmallBoxHeight = 1.0;
         this.mazeLowerSmallBoxY = this.lowerSectionY + this.mazeLowerSmallBoxHeight;
         this.mazeLowerSmallBoxZLength = this.mazeLowerBigBoxZLength;
+
+        this.mazeFloorArrowX = this.mazeLowerToMiddleJumpPlatformXStart;
+        this.mazeFloorArrowY = this.lowerSectionY + 0.1;
+        this.mazeFloorArrowZ = this.trackZCentre + this.mazeLowerToMiddleJumpPlatformZLength;
+        this.mazeFloorArrowRotationMatrixYAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
+        this.mazeFloorArrowRotationMatrixZAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0, 0 ), -Math.PI/2 );
+        this.mazeFloorArrowRotationMatrixFinal = this.mazeFloorArrowRotationMatrixYAxis.multiply( this.mazeFloorArrowRotationMatrixZAxis );
+
+        this.nothingDownHereX = this.mazeBackWallXStart - 0.05;
+        this.nothingDownHereY = this.mazeLowerBigBoxY + 1.0;
         
         this.mazeLowerToMiddleJumpPlatform  =   new FloorPiece( this.gameWorld, 
                                                                 [ this.mazeLowerToMiddleJumpPlatformXStart, this.mazeLowerToMiddleJumpPlatformY, this.trackZCentre - this.mazeLowerToMiddleJumpPlatformZLength ],
@@ -641,6 +772,24 @@ export default class level {
                                                              [ this.mazeLowerBigBoxXLength, this.mazeLowerBigBoxHeight, this.mazeLowerBigBoxZLength],
                                                              this.colorHue
                                                            );
+
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.mazeFloorArrow    =   new ImagePlate( this.gameWorld,
+                                                   this.defaultImagePlateSize,
+                                                   [ this.mazeFloorArrowX, this.mazeFloorArrowY, this.mazeFloorArrowZ ], 
+                                                   this.mazeFloorArrowRotationMatrixFinal, 
+                                                   'straight_arrow'
+                                                 );
+
+        this.nothingDownHere    =   new ImagePlate( this.gameWorld,
+                                                   this.defaultImagePlateSize,
+                                                   [ this.nothingDownHereX, this.nothingDownHereY, this.trackZCentre ], 
+                                                   this.defaultImageRotationMatrix, 
+                                                   'nothing_down_here'
+                                                 );
+                                                           
 
         ///////////////////////////////////////
         /////////// MIDDLE SECTION ////////////
@@ -733,6 +882,21 @@ export default class level {
         this.secondWidePlatformXStart = this.firstWidePlatformXStart;
         this.secondWidePlatformY = this.secondPlatformAfterFirstWideY;
 
+        this.arcingArrowLeftLowerFromBoxX = this.parkourStartingBoxXStart - 0.8;
+        this.arcingArrowLeftLowerFromBoxY = this.parkourStartingBoxY + 1.5;
+        this.arcingArrowLeftLowerFromBoxZ = this.trackZCentre - this.trackWidth + 0.05;
+        this.arcingArrowLeftLowerRotationMatrix = this.mazeFloorArrowRotationMatrixYAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0, 0 ), 0 );
+
+        this.arcingArrowLeftUpperX = this.firstPlatformAfterFirstWideXStart + 1.0;
+        this.arcingArrowLeftUpperY = this.firstPlatformAfterFirstWideY + 0.8;
+
+        this.arcingArrowRightUpperX = this.longPlatformAfterFirstWideXStart + 1.0;
+        this.arcingArrowRightUpperY = this.longPlatformAfterFirstWideY + 0.8;
+
+        this.arcingArrowUpperRotationMatrix = this.mazeFloorArrowRotationMatrixYAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), Math.PI / 2 );
+        this.arcingArrowLeftUpperRotationMatrix = this.mazeFloorArrowRotationMatrixYAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), -Math.PI / 8 );
+        this.arcingArrowRightUpperRotationMatrix = this.mazeFloorArrowRotationMatrixYAxis = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), Math.PI / 6 );
+
         
         
         this.parkourStartingBox             =   new FloorPiece( this.gameWorld,
@@ -776,6 +940,37 @@ export default class level {
                                                                 [ this.parkourWidePlatformXLength, this.mazePlatformThickness, this.parkourWidePlatformZLength ],
                                                                 this.colorHue
                                                                );
+
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.arcingArrowLeftLowerFromBox        =   new ImagePlate( this.gameWorld,
+                                                                    [ 3.2, 3 ],
+                                                                    [ this.arcingArrowLeftLowerFromBoxX, this.arcingArrowLeftLowerFromBoxY, this.arcingArrowLeftLowerFromBoxZ ], 
+                                                                    this.arcingArrowLeftLowerRotationMatrix, 
+                                                                    'arcing_arrow_left'
+                                                                  );
+
+        this.arcingArrowLeftLowerFromPlatform   =   new ImagePlate( this.gameWorld,
+                                                                    [ 3.2, 4 ],
+                                                                    [ this.arcingArrowLeftLowerFromBoxX - 3.4, this.arcingArrowLeftLowerFromBoxY + 1.0, this.arcingArrowLeftLowerFromBoxZ ], 
+                                                                    this.arcingArrowLeftLowerRotationMatrix, 
+                                                                    'arcing_arrow_left'
+                                                                  );
+
+        this.arcingArrowLeftUpper               =   new ImagePlate( this.gameWorld,
+                                                                    [ 2.5, 3 ],
+                                                                    [ this.arcingArrowLeftUpperX, this.arcingArrowLeftUpperY, this.parkourPlatformAfterBoxZCentre + 1.5 ], 
+                                                                    this.arcingArrowUpperRotationMatrix.multiply( this.arcingArrowLeftUpperRotationMatrix ), 
+                                                                    'arcing_arrow_left'
+                                                                  );
+
+        this.arcingArrowRightUpper               =   new ImagePlate( this.gameWorld,
+                                                                     [ 2.5, 3 ],
+                                                                     [ this.arcingArrowRightUpperX, this.arcingArrowRightUpperY, this.longPlatformAfterFirstWideZCentre - 1.5 ], 
+                                                                     this.arcingArrowUpperRotationMatrix.multiply( this.arcingArrowRightUpperRotationMatrix ), 
+                                                                     'arcing_arrow_right'
+                                                                   );
         
         
         
@@ -847,6 +1042,9 @@ export default class level {
         this.pathFromDropDownZCentre = this.trackZCentre + this.trackWidth + this.dropDownFromUpperFloorSectionPathZLength;
         this.pathFromDropDownXLength = 4.0;
 
+        this.ifOnlyCameraAngleX = this.mazeBackWallXStart - 0.05;
+        this.ifOnlyCameraAngleY = this.upperFloorSectionY + 1.2;
+
 
         this.upperFloorSection              =   new FloorPiece( this.gameWorld, 
                                                                 [ this.upperFloorSectionXStart, this.upperFloorSectionY, this.trackZCentre ],
@@ -865,6 +1063,16 @@ export default class level {
                                                                     [ this.pathFromDropDownXLength, this.mazePlatformThickness, this.dropDownFromUpperFloorSectionPathZLength ],
                                                                     this.colorHue
                                                                   );
+
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.ifOnlyCameraAngle        =   new ImagePlate( this.gameWorld,
+                                                          [ 3.5, 3.5 ],
+                                                          [ this.ifOnlyCameraAngleX, this.ifOnlyCameraAngleY, this.trackZCentre ], 
+                                                          this.defaultImageRotationMatrix, 
+                                                          'if_only_camera_angle'
+                                                        );
 
         ///////////////////////////////////////
         ///////////////// TUBE ////////////////
@@ -886,6 +1094,12 @@ export default class level {
 
         this.tubeFrontWallXStart = this.tubeBackWallXStart - ( 2 * this.tubeWallLength ) - this.tubeWallThickness;
 
+        this.arrowIntoTubeX = this.tubeLeftWallXStart + this.tubeWallLength;
+        this.arrowIntoTubeY = this.tubeRaisedWallY + 2.5;
+        this.arrowIntoTubeRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), Math.PI );
+        
+
+
         this.tubeBackWall      =   new FloorPiece( this.gameWorld, 
                                                     [ this.tubeBackWallXStart, this.tubeRaisedWallY, this.tubeBackWallZCentre ], 
                                                     [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeWallLength ],
@@ -906,6 +1120,16 @@ export default class level {
                                                     [ this.tubeWallThickness, this.tubeDropLength + this.tubeWallHeight, this.tubeWallLength ],
                                                     this.colorHue
                                                   );
+
+
+        ///////// CREATE IMAGE PLATE /////////
+
+        this.arrowIntoTube        =   new ImagePlate( this.gameWorld,
+                                                          [ 4, 6 ],
+                                                          [ this.arrowIntoTubeX, this.arrowIntoTubeY, this.tubeLeftWallZCentre + 0.2 ], 
+                                                          this.arrowIntoTubeRotationMatrix, 
+                                                          'straight_arrow'
+                                                        );
 
 
 

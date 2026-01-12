@@ -1,5 +1,11 @@
 # Commit Log
 
+#### 12.01.26
+
+- Added in-game guiding text using hand-drawn images
+- Added more sophisticated texture loading function
+- Changed third person camera to perspective
+
 #### 07.01.26
 
 - Finished level 1 scene
