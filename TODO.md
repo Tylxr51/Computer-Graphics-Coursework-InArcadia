@@ -2,8 +2,6 @@
 
 ### Immediate
 
-ERRORS:
-
 - add fov slider in settings
 - add settings menu in-game
 
@@ -18,5 +16,5 @@ ERRORS:
 - [x] Nicer main menu with settings
 - [x] Platformer camera toggle
 - [x] Build tutorial environment
-- [ ] Player model
+- [x] Player model
 - [ ] [More to be added]

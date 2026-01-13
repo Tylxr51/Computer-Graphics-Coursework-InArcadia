@@ -1,5 +1,11 @@
 # Commit Log
 
+#### 13.01.26
+
+- Created separate files for level0 and leve1 scene generation.
+- levelEnvironment renamed to levelManager
+- Replaced switch function for choosing levels with simpler lookup directory
+
 #### 12.01.26
 
 - Added in GLTF Loading function

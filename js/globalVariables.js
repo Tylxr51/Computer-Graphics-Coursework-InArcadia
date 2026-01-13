@@ -9,8 +9,9 @@ let screenFragmentShader;
 
 let isRectAreaLightUniformLibInit = false;
 
-level0ColorHue = 0.6; // Color of floor pieces
-level1ColorHue = 0.65; // Color of floor pieces
+const colorHueList = { 0 : 0.6,
+                       1 : 0.65
+                     }
 
 let gameInProgress;
 let stopGameloop;
