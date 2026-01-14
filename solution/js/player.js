@@ -333,7 +333,7 @@ class PlayerControls {
         document.removeEventListener( 'keydown', this.onKeyDown );
         document.removeEventListener( 'keyup', this.onKeyUp );
 
-        this.player.playerControls.cameraController.pointerSpeed = 0;    // turn off mouse movement
+        this.cameraController.pointerSpeed = 0;    // turn off mouse movement
 
         // stop movement
         this.moveForward = this.moveBackward = this.moveLeft = this.moveRight = false;
@@ -348,7 +348,7 @@ class PlayerControls {
         document.addEventListener( 'keydown', this.onKeyDown );
         document.addEventListener( 'keyup', this.onKeyUp );
 
-        this.player.playerControls.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
+        this.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
 
     }
 
@@ -536,6 +536,8 @@ class PlayerControls {
     // PURPOSE: Unlock user cursor, dispose of camera controls, set variables to null, ammo garbage disposal, and turn off movement ( removes movement listeners )
     // USED BY: Player.disposePlayer()
     disposePlayerControls() {
+
+        this.turnOffMovement();             // remove movement listeners
         
         // set variables to null
         this.player = null;
@@ -552,8 +554,6 @@ class PlayerControls {
         this.rightVector = null;
         this.movementDirection = null;
         this.scaledMovementDirection = null;
-
-        this.turnOffMovement();             // remove movement listeners
 
         Ammo.destroy(this.tmpScaledMovementDirection);
         this.tmpScaledMovementDirection = null;
