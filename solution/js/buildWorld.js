@@ -43,10 +43,10 @@ export default class World {
         const sceneBackgroundColor = 0x000000;
         const sceneFogColor = 0x000000;
         const sceneFogNear = 0;
-        const sceneFogFar = 30;
+        this.sceneFogFar = 30;
 
-        this.scene.background = new THREE.Color( sceneBackgroundColor );                    // black background color
-		this.scene.fog = new THREE.Fog( sceneFogColor, sceneFogNear, sceneFogFar );         // black fog
+        this.scene.background = new THREE.Color( sceneBackgroundColor );                                // black background color
+		if ( !debug ) { this.scene.fog = new THREE.Fog( sceneFogColor, sceneFogNear, this.sceneFogFar ) }    // black fog
 
 
         // RENDERER INIT
@@ -77,6 +77,7 @@ export default class World {
         this.rigidBodies = []; 
 
     }
+
 
     // PURPOSE: Update camera aspect ratios
     // USED BY: called on window resize

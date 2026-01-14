@@ -2,6 +2,13 @@
 
 #### 14.01.26
 
+- Added GeneralLevelLighting class that gives levels blue/red lighting
+- Moved the directional light from the screen to belong to the screen class
+- Fixed key commands when game is paused bug
+- Lowered fog intensity in third person camera
+
+#### 14.01.26
+
 - Reorganised project folder structure.
 - Refactored all js files and added comments for each function
 

@@ -74,6 +74,25 @@ function initRectAreaLight() {
 }
 
 
+// PURPOSE: Creates a hemisphere light ( and helper in debug mode ) and adds to current scene
+// USED BY: createSceneLevelX() functions
+export class GeneralLevelLighting {
+
+    // PURPOSE: As described above
+    constructor( gameWorld ) {
+
+        const blueRedHemisphereLight = new THREE.HemisphereLight( 0xff0000, 0x0000ff, 2 );      // blue sky color, red sky color
+        blueRedHemisphereLight.position.set( 20, 20, 0 );       // position above level
+        gameWorld.scene.add( blueRedHemisphereLight );          // spawn light in current scene
+
+        // add light helper if debug mode is on
+        const blueRedHemisphereLightHelper = new THREE.HemisphereLightHelper( blueRedHemisphereLight, 5 );
+        if ( debug ) { gameWorld.scene.add( blueRedHemisphereLightHelper ) };
+
+    }
+    
+}
+
 // PURPOSE: Handles 3D player character model - spawning / despawning and location updating
 // USED BY: Player
 export class PlayerGLTF {
@@ -251,11 +270,11 @@ export class OutOfBoundsPlatform extends triggerPlatform {
 }
 
 
-// PURPOSE: Creates a plane geometry with a shader material with another plane behind it using RectAreaLight. Used for the large floating arcade screen.
+// PURPOSE: Creates a plane geometry with a shader material, a 'backlight' plane behind it using RectAreaLight, and a directional light. Used for the large floating arcade screen.
 // USED BY: createSceneLevelX() functions
 export class Screen {
     
-    // Create planes and spawn them at set positions
+    // Create planes and lights and spawn them at set positions
     constructor( gameWorld ) {
         
         this.gameWorld = gameWorld;
@@ -264,22 +283,26 @@ export class Screen {
         initRectAreaLight();
         
         // screen size
-        this.screenWidth = 144.0;
-        this.screenHeight = 90.0;
-        this.screenX = 30;
-        this.screenY = 40;
-        this.screenZ = 100;
+        const screenWidth = 144.0;
+        const screenHeight = 90.0;
+        const screenX = 30;
+        const screenY = 40;
+        const screenZ = 100;
+
+
+
+        ///////////// TEXTURED SCREEN /////////////
         
         // screen geometry
-        this.screenGeometry = new THREE.PlaneGeometry( this.screenWidth, this.screenHeight, 100, 100 );
+        this.screenGeometry = new THREE.PlaneGeometry( screenWidth, screenHeight, 100, 100 );
 
         // screen material with screenVertexShader and screenFragmentShader
         this.screenMaterial = new THREE.ShaderMaterial( 
             { vertexShader: loadedShaders[ 'screen-vertex-shader' ],                            // use screen-vertex-shader as vertex shader
               fragmentShader: loadedShaders[ 'screen-fragment-shader' ],                        // use screen-fragment-shader as fragment shader
               transparent : true,                                                               // enable transparency for curved edges
-              uniforms : { shapeWidth : { value : this.screenWidth },                           // pass screenWidth for vertex shader to calculate curvature
-                           shapeHeight : { value : this.screenHeight },                         // pass screenHeight for vertex shader to calculate curvature
+              uniforms : { shapeWidth : { value : screenWidth },                                // pass screenWidth for vertex shader to calculate curvature
+                           shapeHeight : { value : screenHeight },                              // pass screenHeight for vertex shader to calculate curvature
                            uTime : { value : 0 },                                               // pass time variable for fragment shader scanline animation
                            uScreen : { value : loadedTextures['image_on_screen'] },             // pass screen texture image
                            isFlickerOn : {value : Number( isFlickerOn ) }                       // pass boolean to turn screen flickering on or off
@@ -290,7 +313,7 @@ export class Screen {
         this.screenMesh = new THREE.Mesh( this.screenGeometry, this.screenMaterial );
 
         // set position and rotation
-        this.screenMesh.position.set( this.screenX, this.screenY, this.screenZ );                       // far away in +z direction
+        this.screenMesh.position.set( screenX, screenY, screenZ );                       // far away in +z direction
 
         this.screenMeshRotationMatrixY = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), Math.PI );         // define a rotation matrix about the y-axis
         this.screenMeshRotationMatrixZ = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0, 0 ), Math.PI / 8 );     // define a rotation matrix about the z-axis
@@ -301,13 +324,15 @@ export class Screen {
         this.gameWorld.scene.add( this.screenMesh )             // add screenMesh to scene
 
 
+        ///////////// SCREEN BACKLIGHT /////////////
+
         // create screenLight geometry
-        this.screenLight = new THREE.RectAreaLight( 0x8822aa, 0.25, this.screenWidth, this.screenHeight - 20 );
+        this.screenLight = new THREE.RectAreaLight( 0x8822aa, 0.25, screenWidth, screenHeight - 20 );       // shrunk in y direction so cant see it peeking behind when you fall off track
         
         // set screenLight position and rotation
         this.screenLightRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0 ,0 ), - Math.PI / 8 );
-        this.screenLight.quaternion.setFromRotationMatrix( this.screenLightRotationMatrix )             // rotate to face -z direction
-        this.screenLight.position.set( this.screenX, this.screenY + 10, this.screenZ + 20 );
+        this.screenLight.quaternion.setFromRotationMatrix( this.screenLightRotationMatrix )                 // rotate to face -z direction
+        this.screenLight.position.set( screenX, screenY + 10, screenZ + 20 );                               // shifted behind the main screen from player's perspective
 
         // create screen body
         this.screenBody = new RectAreaLightHelper( this.screenLight )
@@ -317,6 +342,15 @@ export class Screen {
         this.gameWorld.scene.add( this.screenBody );
 
 
+        ///////////// DIRECTIONAL LIGHT /////////////
+
+        this.screenDirectionalLight = new THREE.DirectionalLight( 0xffaaff, 0.5 );
+        this.screenDirectionalLight.position.set( screenX, screenY, screenZ );
+        this.screenDirectionalLight.target.position.set( screenX, 0, 0 );           // point light at middle of track
+        this.gameWorld.scene.add( this.screenDirectionalLight );
+        
+        const dlighthelper = new THREE.DirectionalLightHelper( this.screenDirectionalLight, 5 );
+        if ( debug ) { this.gameWorld.scene.add( dlighthelper ); }                  // add helper to scene if debug is on
 
 
     }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from './objectSpawner.js'
+import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate, GeneralLevelLighting } from './objectSpawner.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
  
 
@@ -628,20 +628,24 @@ export default function createSceneLevel1( args ) {
         
 
 
-
-    // temporary lighting
-
-    const lvl1hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 2 );
-    gameWorld.scene.add( lvl1hemlight );
-
-    const templight = new THREE.RectAreaLight( 0xff0000, 1, 1, 1 );
-    templight.quaternion.set(-0.7071068, 0, 0, 0.7071068)    // rotate to face +x direction
-    templight.position.set( 30, 2, 0 );
-    const templightbody = new RectAreaLightHelper( templight )
+    //////////////////////////////////////
+    ///////// GENERAL LIGHTING ///////////
+    //////////////////////////////////////
+    
+    const levelLighting = new GeneralLevelLighting( gameWorld );
 
 
-    gameWorld.scene.add( templight );
-    gameWorld.scene.add( templightbody ); 
+
+    //////////////////////////////////////
+    //////////// AXIS HELPER /////////////
+    //////////////////////////////////////
+
+    // display axes in debug mode and show world origin
+    const axesHelper = new THREE.AxesHelper( 3 ) ;
+    axesHelper.position.set( 0, 0, 0 );
+    if ( debug ) { gameWorld.scene.add( axesHelper ) };
+
+
 
     return { screen, levelCompletePlatform, outOfBoundsPlatform }
 

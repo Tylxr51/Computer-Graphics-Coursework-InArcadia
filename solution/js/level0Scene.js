@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from './objectSpawner.js'
-import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
+import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate, GeneralLevelLighting} from './objectSpawner.js'
  
 
 
@@ -410,35 +409,23 @@ export default function createLevel0Scene( args ) {
 
 
 
-    // Set up lighting
-    const directionalLight = new THREE.DirectionalLight( 0xffaaff, 0.5 );
-    directionalLight.position.set( 30, 40, 100 );
-    directionalLight.target.position.set( 30, 0, 0 );
-    gameWorld.scene.add(directionalLight);
+    //////////////////////////////////////
+    ///////// GENERAL LIGHTING ///////////
+    //////////////////////////////////////
     
-    const dlighthelper = new THREE.DirectionalLightHelper( directionalLight );
-    if ( debug ) { gameWorld.scene.add( dlighthelper ); }
-    
-    const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
-    gameWorld.scene.add( hemlight );
-
-    
-    // const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 10);
-    // directionalLight2.position.set(60,-2,1);
-    // directionalLight2.target.position.set(58, -10, 0)
-
-    // this.gameWorld.scene.add(directionalLight2);
+    const levelLighting = new GeneralLevelLighting( gameWorld );
 
 
-    // const dlighthelper2 = new THREE.DirectionalLightHelper(directionalLight2);
-    // this.gameWorld.scene.add(dlighthelper2);
 
-    // const overheadLights = new OverheadLights();
-    // this.gameWorld.scene.add(overheadLights.light1);
+    //////////////////////////////////////
+    //////////// AXIS HELPER /////////////
+    //////////////////////////////////////
 
-    // const axesHelper = new THREE.AxesHelper(30)
-    // axesHelper.position.set(0, 5, 0);
-    // this.gameWorld.scene.add(axesHelper);
+    // display axes in debug mode and show world origin
+    const axesHelper = new THREE.AxesHelper( 3 ) ;
+    axesHelper.position.set( 0, 0, 0 );
+    if ( debug ) { gameWorld.scene.add( axesHelper ) };
+
 
 
     return { screen, levelCompletePlatform, outOfBoundsPlatform }           // needed by levelManager

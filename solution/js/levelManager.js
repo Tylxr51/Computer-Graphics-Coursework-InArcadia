@@ -149,14 +149,14 @@ export default class LevelManager {
             // switch to other camera
             case 'KeyT':
 
-                document.dispatchEvent( new CustomEvent( 'switch-camera' ) );
+                if ( gameInProgress ) { document.dispatchEvent( new CustomEvent( 'switch-camera' ) ) };
 
                 break;
 
             // kill player
             case 'KeyK':
 
-                document.dispatchEvent( new CustomEvent( 'trigger-player-death' ) );
+                if ( gameInProgress ) { document.dispatchEvent( new CustomEvent( 'trigger-player-death' ) ) };
 
                 break;
 
@@ -223,10 +223,11 @@ export default class LevelManager {
     // USED BY: switchCamera() 
     useFirstPersonCamera() {
 
-        this.currentCameraIndex = this.gameWorld.firstPersonCameraIndex;                // update currentCameraIndex
-        this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];     // switch to first person camera
-        this.player.playerControls.turnOnMovement();                                    // turn on movement
-        this.player.playerGLTFMesh?.despawnPlayerGLTFMesh();
+        this.currentCameraIndex = this.gameWorld.firstPersonCameraIndex;                    // update currentCameraIndex
+        this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];         // switch to first person camera
+        this.player.playerControls.turnOnMovement();                                        // turn on movement
+        this.player.playerGLTFMesh?.despawnPlayerGLTFMesh();                                // despawn player character mesh
+        if ( !debug ) { this.gameWorld.scene.fog.far = this.gameWorld.sceneFogFar }         // reset fog
 
     }
 
@@ -235,10 +236,11 @@ export default class LevelManager {
     // USED BY: switchCamera() 
     useThirdPersonCamera() {
 
-        this.currentCameraIndex = this.gameWorld.thirdPersonCameraIndex;                // update currentCameraIndex
-        this.currentCamera = this.gameWorld.cameraArray[this.currentCameraIndex];       // switch to third person camera
-        this.player.playerControls.turnOffMovement();                                   // turn off movement
-        this.player.playerGLTFMesh?.spawnPlayerGLTFMesh();
+        this.currentCameraIndex = this.gameWorld.thirdPersonCameraIndex;                    // update currentCameraIndex
+        this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];         // switch to third person camera
+        this.player.playerControls.turnOffMovement();                                       // turn off movement
+        this.player.playerGLTFMesh?.spawnPlayerGLTFMesh();                                  // spawn player character mesh
+        if ( !debug ) { this.gameWorld.scene.fog.far = this.gameWorld.sceneFogFar + 30 }    // make fog weaker so third person camera can see
 
     }
 
