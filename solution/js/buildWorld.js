@@ -1,63 +1,76 @@
 import * as THREE from 'three';
 
 
+// PURPOSE: Handles the cameras, scene, renderer, and physics simulation
+// USED BY: LevelManager
 export default class World {
-    // initialise game world
-    constructor(gravityVector, abortController) {
 
+    // PURPOSE: Initialise game world - set up cameras, scene, renderer, and call physics simulation initialisation
+    constructor( gravityVector, abortController ) {
 
-        // first person camera setup
-        this.firstPersonCameraWalkFOV = 75;
-        this.firstPersonCameraAspect;
-        this.firstPersonCameraNear = 0.1;
-        this.firstPersonCameraFar = 1000;
-        this.firstPersonCamera = new THREE.PerspectiveCamera( this.firstPersonCameraWalkFOV, 
-                                                              this.firstPersonCameraAspect,
-                                                              this.firstPersonCameraNear, 
-                                                              this.firstPersonCameraFar 
-                                                            );
+        // FIRST PERSON CAMERA INIT
+        const firstPersonCameraWalkFOV = 75;
+        const firstPersonCameraAspect = window.innerWidth / window.innerHeight;
+        const firstPersonCameraNear = 0.1;
+        const firstPersonCameraFar = 1000;
 
-        // PERSPECTIVE THIRD PERSON CAMERA
-        this.thirdPersonCameraWalkFOV = 50;
-        this.thirdPersonCameraAspect = window.innerWidth / window.innerHeight;
-        this.thirdPersonCameraNear = 0.1;
-        this.thirdPersonCameraFar = 1000;
-        this.thirdPersonCameraDistanceFromScene = 15;
-        this.thirdPersonCamera = new THREE.PerspectiveCamera( 
-            this.thirdPersonCameraWalkFOV, 
-            this.thirdPersonCameraAspect, 
-            this.thirdPersonCameraNear, 
-            this.thirdPersonCameraFar 
+        this.firstPersonCamera = new THREE.PerspectiveCamera(
+            firstPersonCameraWalkFOV, 
+            firstPersonCameraAspect,
+            firstPersonCameraNear, 
+            firstPersonCameraFar 
         );
 
 
+        // THIRD PERSON CAMERA INIT
+        const thirdPersonCameraWalkFOV = 50;
+        const thirdPersonCameraAspect = window.innerWidth / window.innerHeight;
+        const thirdPersonCameraNear = 0.1;
+        const thirdPersonCameraFar = 1000;
+        this.thirdPersonCameraDistanceFromScene = 15;
 
-        // scene and renderer setup
+        this.thirdPersonCamera = new THREE.PerspectiveCamera( 
+            thirdPersonCameraWalkFOV, 
+            thirdPersonCameraAspect, 
+            thirdPersonCameraNear, 
+            thirdPersonCameraFar 
+        );
+
+
+        // SCENE INIT
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0x000000 );
-		this.scene.fog = new THREE.Fog( 0x000000, 0, 30 );
 
+        const sceneBackgroundColor = 0x000000;
+        const sceneFogColor = 0x000000;
+        const sceneFogNear = 0;
+        const sceneFogFar = 30;
+
+        this.scene.background = new THREE.Color( sceneBackgroundColor );                    // black background color
+		this.scene.fog = new THREE.Fog( sceneFogColor, sceneFogNear, sceneFogFar );         // black fog
+
+
+        // RENDERER INIT
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.setPixelRatio( window.devicePixelRatio );
-        this.renderer.toneMapping = THREE.ReinhardToneMapping;
         document.body.appendChild( this.renderer.domElement );              // add canvas to document body
 
-        // set camera aspect ratios
-        this.setCameraAspectRatios();
 
+        // set up camera array (so levelManager can switch cameras easily)
         this.cameraArray = [ this.firstPersonCamera, this.thirdPersonCamera ];
         this.firstPersonCameraIndex = 0;
         this.thirdPersonCameraIndex = 1;
 
+
         // handle window resizing
-        this.onWindowResize = () => { this.setCameraAspectRatios(); }
-        window.addEventListener( 'resize', this.onWindowResize, { signal: abortController.signal } );  
+        const onWindowResize = () => { this.setCameraAspectRatios() };
+        window.addEventListener( 'resize', onWindowResize, { signal: abortController.signal } );  
 
 
         // define world gravity vector
         this.gravityVector = gravityVector;
         
+
         // initialise physics variables
         this.physicsWorld;
         this.tmpTransform;
@@ -65,6 +78,8 @@ export default class World {
 
     }
 
+    // PURPOSE: Update camera aspect ratios
+    // USED BY: called on window resize
     setCameraAspectRatios() {
 
         // set camera aspect ratios
@@ -78,17 +93,19 @@ export default class World {
         // update renderer
         this.renderer.setSize( window.innerWidth, window.innerHeight );
 
-        
     }
 
-    // initialise world physics
+
+    // PURPOSE: Initialise world physics
+    // USED BY: World.constructor()
     initPhysics() {
 
-        // initialise physicsWorld
+        // PHYSICS SIMULATION INIT
         this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
         this.dispatcher = new Ammo.btCollisionDispatcher( this.collisionConfiguration );
         this.broadphase = new Ammo.btDbvtBroadphase();
         this.solver = new Ammo.btSequentialImpulseConstraintSolver();
+
         this.physicsWorld = new Ammo.btDiscreteDynamicsWorld( this.dispatcher, 
                                                               this.broadphase, 
                                                               this.solver, 
@@ -110,10 +127,17 @@ export default class World {
         // enable collision between ghost objects and rigid bodies
         this.ammoGhostPairCallback = new Ammo.btGhostPairCallback();
         this.physicsWorld.getBroadphase().getOverlappingPairCache().setInternalGhostPairCallback( this.ammoGhostPairCallback );
+
     }
 
+
+    // !!UNUSED!!
+    // -- WAS WRITTEN AT THE START OF DEVELOPMENT TO TEST AMMO, NO LONGER NEEDED FOR GAME BUT KEPT IN TO SHOW CAPABILITY TO ADD IN PHYSICS OBJECTS EASILY
+    // PURPOSE: Updates rigid body mesh positions given by physics simulation
+    // USED BY: LevelManager.Gameloop
     updateRigidBodyMeshToSimulation() {
 
+        // iterate through all rigid bodies
         for ( let i = 0; i < this.rigidBodies.length; ++i ) {
 
             this.rigidBodies[i].motionstate.getWorldTransform( this.tmpTransform );   // get world transform
@@ -134,9 +158,14 @@ export default class World {
             // update mesh position and roatation
             this.rigidBodies[i].mesh.position.copy( this.currentRBPos );
             this.rigidBodies[i].mesh.quaternion.copy( this.currentRBQuat );
+
         }
+
     }
 
+
+    // PURPOSE: Dispose of all scene childen, remove renderer from document, ammo garbage disposal
+    // USED BY: Called by levelManager on level exit
     disposeWorld() {
 
         // remove canvas from document body

@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
+import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from './objectSpawner.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
  
 
 
 export default function createLevel0Scene( args ) {
 
+    // unpack args
     const { gameWorld,
             player,
             playerSpawnY,
@@ -14,12 +15,13 @@ export default function createLevel0Scene( args ) {
           } = args;
 
 
-    const trackWidth = 2.00;     // width of floorpieces
-    const trackZCentre = 0.00;
+    // define variables used throughout level
+    const trackWidth = 2.00;        // width of floorpieces
+    const trackZCentre = 0.00;      // centre point of track
 
+    // define some variables for ImagePlates that are used frequently
     const defaultImagePlateSize = [ 4, 4 ];
     const defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
-
 
 
     //////////////////////////////////////
@@ -29,13 +31,11 @@ export default function createLevel0Scene( args ) {
     const outOfBoundsPlatform = new OutOfBoundsPlatform( gameWorld, player );
 
 
-
     //////////////////////////////////////
     /////////////// SCREEN ///////////////
     //////////////////////////////////////
 
     const screen = new Screen( gameWorld );
-
 
 
     //////////////////////////////////////
@@ -65,10 +65,10 @@ export default function createLevel0Scene( args ) {
                                                 'wasd'
                                               );
 
+
     ///////////////////////////////////////
     //////////// LOWER SECTION ////////////
     ///////////////////////////////////////
-
 
     ///// POSITION AND SIZE VARIABLES /////
 
@@ -115,11 +115,9 @@ export default function createLevel0Scene( args ) {
                                                           );
 
 
-
     ///////////////////////////////////////
     //////////// UPPER SECTION ////////////
     ///////////////////////////////////////
-
 
     ///// POSITION AND SIZE VARIABLES /////
 
@@ -143,6 +141,7 @@ export default function createLevel0Scene( args ) {
     const shiftToSprintX = floorAfterSprintJumpXStart - ( sprintJumpGapDistance / 2 )
     const shiftToSprintY = raisedSectionY + 0.6;
     const shiftToSprintTextureString = 'press'.repeat( Number( toggleSprint ) ) + 'hold'.repeat( Number( !toggleSprint ) ) + '_shift_to_sprint';
+
 
     ///////// CREATE FLOOR PIECES /////////
 
@@ -180,11 +179,9 @@ export default function createLevel0Scene( args ) {
                                                     );
 
 
-
     //////////////////////////////////////
     //////////// DASH SECTION ////////////
     //////////////////////////////////////
-
 
     ///// POSITION AND SIZE VARIABLES ////
 
@@ -296,7 +293,6 @@ export default function createLevel0Scene( args ) {
     const tubeSkullAndCrossbonesY = tubeSectionFloorHeight - 1.5;
     const tubeSkullAndCrossbonesZ = trackZCentre + ( 2 * tubeZLength ) + 0.05;
     const tubeSkullAndCrossbonesRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 1, 0 ,0 ), 0 );
-    
 
 
     ///////// CREATE FLOOR PIECES //////////
@@ -388,21 +384,6 @@ export default function createLevel0Scene( args ) {
                                                             'tube_spikes'
                                                             );
 
-    // Set up box
-    // const boxGeometry = new THREE.BoxGeometry();
-    // const boxMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00 } );
-    // const boxMesh = new THREE.Mesh( boxGeometry, boxMaterial );
-    // boxMesh.position.set(5, 2.5, 0);    
-    // this.gameWorld.scene.add( boxMesh );
-
-    // const rbBox = new RigidBody();
-    // rbBox.createBox( new THREE.Vector3(1,1,1), 1, boxMesh.position, boxMesh.quaternion);
-    // rbBox.body.setCollisionFlags(Ammo.btCollisionObject.CF_CHARACTER_OBJECT);
-    // this.gameWorld.physicsWorld.addRigidBody(rbBox.body);
-
-    // this.gameWorld.rigidBodies.push({mesh: boxMesh, rigidBody: rbBox});
-    // this.gameWorld.rigidBodies.push({mesh: floorMesh, rigidBody: rbFloor});
-
 
     //////////////////////////////////////
     ////////// LEVEL COMPLETE ////////////
@@ -459,6 +440,7 @@ export default function createLevel0Scene( args ) {
     // axesHelper.position.set(0, 5, 0);
     // this.gameWorld.scene.add(axesHelper);
 
-    return { screen, levelCompletePlatform, outOfBoundsPlatform }
+
+    return { screen, levelCompletePlatform, outOfBoundsPlatform }           // needed by levelManager
 
 }

@@ -1,39 +1,45 @@
+// PURPOSE: write variable value to HTML element
+// USED BY: multiple menu classes 
 function writeVariable( HTMLLocation, variable ) {
-    if ( typeof(variable) == 'boolean' ) {
-        variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) );
-    }
-    HTMLLocation.innerHTML = variable;
+
+    // if variable is a boolean, instead of writing 'true' / 'false', change to 'on' / 'off'
+    if ( typeof( variable ) == 'boolean' ) { 
+        
+        variable = 'on'.repeat( Number( variable ) ) + 'off'.repeat( Number( !variable ) ) 
+    
+    };
+
+    HTMLLocation.innerHTML = variable;      // write variable to HTML element
+
 }
 
 
-// base class for menu screens
+// PURPOSE: Base class for menus
+// USED BY: Every menu classes 
 class Menu {
     
     // get menu screen location from index.html and make a back button function
     constructor ( menuHTMLName ) {
+
         this.menu = document.getElementById( menuHTMLName );
         this.onBackClick = () => this.hideMenu();
+
     }
 
     // menu display functions
-    showMenu() {
-        this.menu.style.display = 'flex';      //  show menu
-    }
+    showMenu() { this.menu.style.display = 'flex' }      //  show menu 
+    hideMenu() { this.menu.style.display = 'none' }      //  hide menu
 
-    hideMenu() {
-        this.menu.style.display = 'none';      //  hide menu
-    }
-
-    exitLevel() {
-        document.dispatchEvent( new CustomEvent( 'exit-level' ) );      // send signal to end level to level manager
-    }
-
+    exitLevel() { document.dispatchEvent( new CustomEvent( 'exit-level' ) ) }     // send signal to level manager to end level
+    
 }
 
 
-// main menu class using base menu class
+// PURPOSE: Main mainmenu logic
+// USED BY: main.js 
 export class MainMainMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor ( menuHTMLName, levelsMenu, settingsMenu, controlsMenu ) {
         
         // get menu screen location, back button function, and show/hide functions
@@ -53,62 +59,74 @@ export class MainMainMenu extends Menu {
         this.levelsButton.addEventListener( 'click', this.onLevelsButtonClick );
         this.controlsButton.addEventListener( 'click', this.onControlsButtonClick );
         this.settingsButton.addEventListener( 'click', this.onSettingsButtonClick );
+
     }
+
 }
 
 
-// levels menu class using base menu class
+// PURPOSE: Levels mainmenu logic
+// USED BY: main.js 
 export class LevelsMainMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor ( menuHTMLName ) {
 
         // get menu screen, back button function, and show/hide functions
         super ( menuHTMLName );
 
         // get menu button locations
-        this.level0Button = document.getElementById('level-0-button');
-        this.level1Button = document.getElementById('level-1-button');
-        this.backButton   = document.getElementById('levels-back-button');
+        this.level0Button = document.getElementById( 'level-0-button' );
+        this.level1Button = document.getElementById( 'level-1-button' );
+        this.backButton   = document.getElementById( 'levels-back-button' );
 
         // define button click functions
-        this.onLevel0Click = () => this.selectLevel(0);
-        this.onLevel1Click = () => this.selectLevel(1);
+        this.onLevel0Click = () => this.selectLevel( 0 );
+        this.onLevel1Click = () => this.selectLevel( 1 );
 
         // make listeners for button clicks
-        this.level0Button.addEventListener('click', this.onLevel0Click);
-        this.level1Button.addEventListener('click', this.onLevel1Click);
-        this.backButton.addEventListener('click', this.onBackClick);
+        this.level0Button.addEventListener( 'click', this.onLevel0Click );
+        this.level1Button.addEventListener( 'click', this.onLevel1Click );
+        this.backButton.addEventListener( 'click', this.onBackClick );
     }
 
     // function to hide menu and launch given level
     selectLevel = (levelIndex) => {
+
         this.hideMenu()
-        document.dispatchEvent(new CustomEvent('launch-level', {detail: {level: levelIndex}}));
+        document.dispatchEvent( new CustomEvent( 'launch-level', { detail: { level: levelIndex } } ) );
+
     }
+
 }
 
 
+// PURPOSE: Controls mainmenu logic
+// USED BY: main.js 
 export class ControlsMainMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor ( menuHTMLName ) {
         
         // get menu screen location, back button function, and show/hide functions
         super( menuHTMLName );
 
         // get menu button locations
-        this.backButton = document.getElementById('controls-back-button');
-
-        // define button click functions
+        this.backButton = document.getElementById( 'controls-back-button' );
         
         // make listeners for button clicks
-        this.backButton.addEventListener('click', this.onBackClick);
+        this.backButton.addEventListener( 'click', this.onBackClick );
+
     }
+
 }
 
 
-// settings menu class using base menu class
+// PURPOSE: Settings mainmenu logic
+// USED BY: main.js 
 export class SettingsMainMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor ( menuHTMLName ) {
 
         // get menu screen, back button function, and show/hide functions
@@ -170,12 +188,15 @@ export class SettingsMainMenu extends Menu {
         this.backButton.addEventListener( 'click', this.onBackClick );
 
     }
+
 }
 
 
-// instructions menu class using base menu class
+// PURPOSE: Instructions gamemenu logic
+// USED BY: levelManager
 export class InstructionsGameMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor( menuHTMLName, player, abortController ) {
 
         // get menu screen, back button function, and show/hide functions
@@ -184,9 +205,9 @@ export class InstructionsGameMenu extends Menu {
         // define menu click function
         this.onInstructionsGameMenuClick = () => {
 
-            this.hideMenu();                                // hide instructions menu
-            player.playerControls.turnOnMovement();         // enable player movement
-            player.playerControls.cameraController.lock();  // lock user cursor
+            this.hideMenu();                                    // hide instructions menu
+            player.playerControls.turnOnMovement();             // enable player movement
+            player.playerControls.cameraController.lock();      // lock user cursor
         }
 
         // make listener for menu screen click
@@ -195,9 +216,12 @@ export class InstructionsGameMenu extends Menu {
     }
 }
 
-// pause menu class using base menu class
+
+// PURPOSE: Pause gamemenu logic
+// USED BY: levelManager
 export class PauseGameMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor( menuHTMLName, player, abortController ) {
 
         // get menu screen, back button function, and show/hide functions
@@ -228,7 +252,9 @@ export class PauseGameMenu extends Menu {
                 writeVariable( this.HTMLResumeStatusLocation, '' );
 
                 if (this.currentCameraIndex === this.firstPersonCameraIndex){ 
+
                     player.playerControls.turnOnMovement();      //  only enable player movement if using first person camera
+
                 }
 
                 player.playerControls.cameraController.lock();   // lock user cursor
@@ -241,28 +267,32 @@ export class PauseGameMenu extends Menu {
                 player.playerControls.dashTimer.elapsedTime = this.storedDashTime;
 
             }, this.unpauseDelayTime );
+
         }
 
-        this.onExitGamePausedButtonClick = () => { this.exitLevel() }
+        // define button click function
+        this.onExitGamePausedButtonClick = () => { this.exitLevel() };
 
-        // make listeners for button clicks
+        // get menu button locations
         this.resumeButton = document.getElementById( 'resume-button' );
         this.exitGameButton = document.getElementById( 'exit-game-paused-button' );
 
+        // make listeners for button clicks
         this.resumeButton.addEventListener('click', this.onResumeButtonClick, { signal: abortController.signal } );
         this.exitGameButton.addEventListener('click', this.onExitGamePausedButtonClick, { signal: abortController.signal } );
         
     }
 
     // getter function to update currentCameraIndex
-    getCurrentCamera( currentCameraIndex ){
-        this.currentCameraIndex = currentCameraIndex;
-    }
+    getCurrentCamera( currentCameraIndex ) { this.currentCameraIndex = currentCameraIndex }
+
 }
 
-// dead menu class using base menu class
+// PURPOSE: Dead gamemenu logic
+// USED BY: levelManager
 export class DeadGameMenu extends Menu {
 
+    // get HTML elements and define button functions
     constructor( menuHTMLName, player, abortController, isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
 
         // get menu screen, back button function, and show/hide functions
@@ -280,35 +310,51 @@ export class DeadGameMenu extends Menu {
 
         }
 
+        // define button click functions
         this.onExitGameDeadButtonClick = () => { this.exitLevel() }
 
-
+        // get menu button locations
         this.resumeButton = document.getElementById( 'respawn-button' );
         this.exitGameButton = document.getElementById( 'exit-game-dead-button' );
 
+        // make listeners for button clicks
         this.resumeButton.addEventListener('click', this.onRespawnButtonClick, { signal: abortController.signal } );
         this.exitGameButton.addEventListener('click', this.onExitGameDeadButtonClick, { signal: abortController.signal } );
+
     }
+
 }
 
-// level complete menu class using base menu class
+
+// PURPOSE: LevelComplete gamemenu logic
+// USED BY: levelManager
 export class LevelCompleteGameMenu extends Menu {
 
-    constructor( menuHTMLName, player, abortController, isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
+    // get HTML elements and define button functions
+    constructor( menuHTMLName, abortController ) {
 
         // get menu screen, back button function, and show/hide functions
         super( menuHTMLName );
 
+        // define button click functions
         this.onExitGameDeadButtonClick = () => { this.exitLevel() }
 
+        // get menu button locations
         this.exitGameButton = document.getElementById( 'exit-game-complete-button' );
 
+        // make listeners for button clicks
         this.exitGameButton.addEventListener('click', this.onExitGameDeadButtonClick, { signal: abortController.signal } );
+
     }
+
 }
 
+
+// PURPOSE: HUD Logic
+// USED BY: levelManager
 export class HUD {
 
+    // Get HUD HTML location and set colors
     constructor( classHTMLName ) {
 
         this.dash = document.querySelector( classHTMLName );
@@ -317,26 +363,20 @@ export class HUD {
 
     }
 
+    // update dash recharge graphic to specified percentage
     updateDashProgress( amount ) {
 
-        this.dash.style.setProperty('--progress', amount );
+        this.dash.style.setProperty('--progress', amount );     // update --progress variable
 
+        // set color of outer ring
         if (amount == 100) { this.dash.style.setProperty('--progress-bar-color', this.progressBarChargedColor )}
         else { this.dash.style.setProperty('--progress-bar-color', this.progressBarChargingColor  )}
 
     }
 
-    showHUD() {
-
-        this.dash.style.opacity = '1';
-
-    }
-
-    hideHUD() {
-
-        this.dash.style.opacity = '0';
-
-    }
+    // HUD display functions
+    showHUD() { this.dash.style.opacity = '1' }     // show HUD
+    hideHUD() { this.dash.style.opacity = '0' }     // hide HUD
 
 
 

@@ -1,18 +1,17 @@
 import * as THREE from 'three';
-import World from '/js/buildWorld.js'
-import Player from '/js/player.js'
-import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
-import { InstructionsGameMenu, PauseGameMenu, DeadGameMenu, LevelCompleteGameMenu, HUD } from '/js/menus.js'
-import { LEVEL_DIRECTORIES } from '/js/levelDirectories.js';
-
-import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
-import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import World from './buildWorld.js'
+import Player from './player.js'
+import { InstructionsGameMenu, PauseGameMenu, DeadGameMenu, LevelCompleteGameMenu, HUD } from './menus.js'
+import { LEVEL_DIRECTORIES } from './levelDirectories.js';
 
 
 
-export default class level {
+// PURPOSE: Owns level-specific objects such as player and gameWorld, handles in-game event logic such as trigger-level-passed and trigger-player-death, 
+//          checks for player collisions with trigger platforms, handles camera switches, and controls gameloop (animation function)
+// USED BY: main.js
+export default class LevelManager {
 
-    // initialise level
+    // PURPOSE: Initialises level manager - sets up variables to be populated later and then calls 3 important functions: buildLevelBackend(), chooseLevelScene(), and gameloop().
     constructor( levelIndex, abortController ) {
 
         this.gameWorld;          // object that handles game environment (camera, renderer, physics initialisation)
@@ -21,7 +20,7 @@ export default class level {
         this.abortController = abortController;                     // object for removing listeners
 
         this.gravityVector = new THREE.Vector3( 0, -9.81, 0 );      // world gravity vector
-        this.clock = new THREE.Clock( true );                        // clock to keep animations synchronised that starts as soon as it is created
+        this.clock = new THREE.Clock( true );                       // clock to keep animations synchronised that starts as soon as it is created
         this.delta;
         this.gameloop = this.gameloop.bind( this );                 // bind this so gameloop function doesn't redefine in future calls
 
@@ -38,13 +37,17 @@ export default class level {
         this.deadMenu;
         this.levelCompleteMenu;
 
-        this.buildLevelBackend();       // create world, player, and menus
-        this.chooseLevelScene( levelIndex );      // create scene
+        this.buildLevelBackend();                   // create world, player, and menus
+        this.chooseLevelScene( levelIndex );        // create scene
 
-        this.gameloop();
+        this.gameloop();                            // start gameloop
+
     }
 
-    // function called when level is selected to initialise camera, physics, etc
+
+    // PURPOSE: Create LevelManager-owned objects such as gameWorld and player, spawn the player with given initial spawn conditions, 
+    //          initialise in-game menus and HUD, and set up listeners for in game events
+    // USED BY: LevelManager.constructor()
     buildLevelBackend() {
 
         // initialise gameWorld and physicsWorld
@@ -89,53 +92,56 @@ export default class level {
                                           this.ammoPlayerSpawnPosition, 
                                           this.ammoPlayerSpawnQuaternion 
                                         );
-        this.levelCompleteMenu = new LevelCompleteGameMenu( 'level-complete-menu', 
-                                          this.player, 
-                                          this.abortController, 
-                                          this.isInitialSpawn, 
-                                          this.ammoPlayerSpawnPosition, 
-                                          this.ammoPlayerSpawnQuaternion 
-                                        );
+        this.levelCompleteMenu = new LevelCompleteGameMenu( 'level-complete-menu', this.abortController );
+
+        // initialise HUD
         this.hud = new HUD( '.dash-progress' );
         this.hud.showHUD();
+
         this.instructionsMenu.showMenu();                   // show instruction menu
         this.player.playerControls.turnOffMovement();       // disable player movement
 
-        // functions for listeners below
+        // functions for listeners
         this.onUnlock = this.pauseGame.bind( this );
         this.onTriggerPlayerDeath = this.killPlayer.bind( this );
         this.onSwitchCamera = this.switchCamera.bind( this );
         this.onTriggerLevelPassed = this.levelPassed.bind( this );
 
         // make listeners
-        document.addEventListener( 'keydown', this.keyCommands, { signal: this.abortController.signal } );      // listener for key down but not tied to player object
-        this.player.playerControls.cameraController.addEventListener( 'unlock', this.onUnlock, { signal: this.abortController.signal } );    // cursor unlock logic
-        document.addEventListener( 'trigger-player-death', this.onTriggerPlayerDeath, { signal: this.abortController.signal });              // player death logic
-        document.addEventListener( 'trigger-level-passed', this.onTriggerLevelPassed, { signal: this.abortController.signal } );
-        document.addEventListener( 'switch-camera', this.onSwitchCamera, { signal: this.abortController.signal } );                          // camera angle toggle
+        document.addEventListener( 'keydown', this.keyCommands, { signal: this.abortController.signal } );      // listener for key down but not tied to player object (for player-independent key commands)
+        this.player.playerControls.cameraController.addEventListener( 'unlock', this.onUnlock, { signal: this.abortController.signal } );   // cursor unlock logic
+        document.addEventListener( 'trigger-player-death', this.onTriggerPlayerDeath, { signal: this.abortController.signal });             // player death logic
+        document.addEventListener( 'trigger-level-passed', this.onTriggerLevelPassed, { signal: this.abortController.signal } );            // level passed logic
+        document.addEventListener( 'switch-camera', this.onSwitchCamera, { signal: this.abortController.signal } );                         // camera angle toggle
 
     }
 
-    // function that chooses which level to load
+
+    // PURPOSE: Calls appropriate level scene building function depending on levelIndex
+    // USED BY: LevelManager.constructor()
     chooseLevelScene( levelIndex ) {
 
-      const buildLevelScene = LEVEL_DIRECTORIES[ levelIndex ]
-      const sceneColor = colorHueList[ levelIndex ]
+        const buildLevelScene = LEVEL_DIRECTORIES[ levelIndex ]     // get appropriate level scene building function from LEVEL_DIRECTORIES
+        const sceneColor = colorHueList[ levelIndex ]               // get appropriate level color from colorHueList
 
-      const objectsRequiringUpdate = buildLevelScene( { gameWorld : this.gameWorld,
+        // build level scene
+        const objectsRequiringUpdate = buildLevelScene( { gameWorld : this.gameWorld,
                                                         player : this.player,
                                                         playerSpawnY : this.playerSpawnY,
                                                         playerSize : this.playerSize,
                                                         colorHue : sceneColor
-                                                      });   
+                                                        });   
 
-      this.screen = objectsRequiringUpdate.screen;
-      this.levelCompletePlatform = objectsRequiringUpdate.levelCompletePlatform;
-      this.outOfBoundsPlatform = objectsRequiringUpdate.outOfBoundsPlatform;
+        // separate level scene building return values
+        this.screen = objectsRequiringUpdate.screen;
+        this.levelCompletePlatform = objectsRequiringUpdate.levelCompletePlatform;
+        this.outOfBoundsPlatform = objectsRequiringUpdate.outOfBoundsPlatform;
 
     }
 
-    // function for key down events related to key commands 
+
+    // PURPOSE: Dispatches keyCommand events when certain key is pressed down
+    // USED BY: keydown listener ( defined in buildLevelBackend() )
     keyCommands = ( event ) => {
 
         switch ( event.code ) {
@@ -165,28 +171,28 @@ export default class level {
         }
     }
 
-    // function triggered on cursor unlock (for pausing game)
+
+    // PURPOSE: Stops game from running ( stops gameloop, player movement, and dashRecharge ) and shows pause menu
+    // USED BY: unlock listener ( defined in buildLevelBackend() )
     pauseGame() {
 
         // if player is dead don't show pause menu (as dead menu is already there)
-        if (this.player.playerIsDead) { return }
+        if ( this.player.playerIsDead ) { return }
 
         gameInProgress = false;     // stop gameloop
 
         this.player.playerControls.dashTimer.stop();        // stop dash cooldown whilst game is paused
 
-        this.pauseMenu.getCurrentCamera(this.currentCameraIndex);       // update pauseMenu's currentCameraIndex variable
+        this.pauseMenu.getCurrentCamera( this.currentCameraIndex );     // update pauseMenu's currentCameraIndex variable
         this.pauseMenu.showMenu();                                      // show pause menu
 
         // disable player movement if current camera is first person (controls already disabled for third person camera)
-        if (this.currentCameraIndex === this.gameWorld.firstPersonCameraIndex) {
-
-            this.player.playerControls.turnOffMovement();
-
-        }
+        if ( this.currentCameraIndex === this.gameWorld.firstPersonCameraIndex ) { this.player.playerControls.turnOffMovement() };
+        
     }
 
-    // function triggered on player death
+    // PURPOSE: Stops game from running ( stops gameloop, player movement, and dashRecharge ), unlocks user's cursor, and shows death menu
+    // USED BY: trigger-player-death listener (defined in buildLevelBackend()) - unlock refers to user 'unlocking' their cursor from the browser
     killPlayer() {
 
         gameInProgress = false;     // stop gameloop
@@ -198,41 +204,47 @@ export default class level {
 
     }
 
-    // function triggered on level passed
+
+    // PURPOSE: Stops game from running ( stops gameloop, player movement, and dashRecharge ), unlocks user's cursor, and shows level complete menu
+    // USED BY: trigger-level-passed listener ( defined in buildLevelBackend() )
     levelPassed() {
 
         gameInProgress = false;     // stop gameloop
 
         this.player.playerIsDead = true;                        // change player state variable
         this.player.playerControls.cameraController.unlock();   // unlock user cursor
-        this.levelCompleteMenu.showMenu();                               // show dead menu
+        this.levelCompleteMenu.showMenu();                      // show level complete menu
         this.player.playerControls.turnOffMovement();           // disable player movement
 
     }
 
-    // function to set current camera to first person
+
+    // PURPOSE: Sets camera to firstPersonCamera, turns on player and mouse movement, and despawns playerGLTFMesh
+    // USED BY: switchCamera() 
     useFirstPersonCamera() {
 
         this.currentCameraIndex = this.gameWorld.firstPersonCameraIndex;                // update currentCameraIndex
         this.currentCamera = this.gameWorld.cameraArray[ this.currentCameraIndex ];     // switch to first person camera
-        this.player.playerControls.turnOnMovement();                                    // turn on player movement
-        this.player.playerControls.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
+        this.player.playerControls.turnOnMovement();                                    // turn on movement
         this.player.playerGLTFMesh?.despawnPlayerGLTFMesh();
 
     }
 
-    // function to set current camera to third person
+
+    // PURPOSE: Sets camera to thirdPersonCamera, turns off player and mouse movement, and spawns playerGLTFMesh
+    // USED BY: switchCamera() 
     useThirdPersonCamera() {
 
         this.currentCameraIndex = this.gameWorld.thirdPersonCameraIndex;                // update currentCameraIndex
         this.currentCamera = this.gameWorld.cameraArray[this.currentCameraIndex];       // switch to third person camera
-        this.player.playerControls.turnOffMovement();                                   // turn off player movement
-        this.player.playerControls.cameraController.pointerSpeed = 0;                   // turn off mouse movement
+        this.player.playerControls.turnOffMovement();                                   // turn off movement
         this.player.playerGLTFMesh?.spawnPlayerGLTFMesh();
 
     }
 
-    // function to swap current camera to other camera
+
+    // PURPOSE: Checks current camera and calls function to enable other camera
+    // USED BY: switch-camera listener ( defined in buildLevelBackend() )
     switchCamera(){
 
         // check which camera is currently in use and call function to enable the other one
@@ -252,6 +264,9 @@ export default class level {
         }
     }
 
+
+    // PURPOSE: Checks objects that player is in contact with and triggers appropriate events 
+    // USED BY: LevelManager.gameloop()
     checkPlayerCollisions() {
 
         this.numOverlaps = this.player.ghostObject.getNumOverlappingObjects();
@@ -261,35 +276,43 @@ export default class level {
 
             // if hit levelComplete then trigger levelComplete contactEvent
             if ( Ammo.getPointer(this.obj) === Ammo.getPointer( this.levelCompletePlatform.platformBody ) ) {
-                this.levelCompletePlatform.triggerContactEvent();
+
+                this.levelCompletePlatform.triggerContactEvent()
+
             }
 
             // if hit outOfBounds and only outOfBounds then trigger outOfBounds contactEvent (had to add the 'and only' condition to stop permadeath glitch)
             else if ( Ammo.getPointer(this.obj) === Ammo.getPointer( this.outOfBoundsPlatform.platformBody ) && this.numOverlaps == 1 ) {
-                this.outOfBoundsPlatform.triggerContactEvent();
+
+                this.outOfBoundsPlatform.triggerContactEvent()
+
             }
+
         }
+
     }
 
-    // game loop
+
+    // PURPOSE: If game is in progress then update animations, physics simulation, and player movement and queue the next frame
+    // USED BY: main.js
     gameloop() {
 
-        if ( stopGameloop ) { return };
+        if ( stopGameloop ) { return };                             // stop loop if exiting level
 
-        requestAnimationFrame( this.gameloop );                     //  schedule next frame if game is still in progress
+        requestAnimationFrame( this.gameloop );                     // schedule next frame if game is still in progress
 
-        this.delta = this.clock.getDelta();                         //  update delta
+        this.delta = this.clock.getDelta();                         // update delta
 
-        // only update scene if game is in progress 
+        // only update scene if game is in progress ( not paused or dead )
         if ( gameInProgress ) {
 
             this.screen.updateScanlines( this.delta );                 // update scanline animation if screen exists
 
             this.hud.updateDashProgress( this.player.playerControls.dashRechargeProgress )  // update dash cooldown in hud
 
-            this.gameWorld.physicsWorld.stepSimulation( this.delta, 10 );    //  update physics sim by delta
+            this.gameWorld.physicsWorld.stepSimulation( this.delta, 10 );       //  update physics sim by delta
 
-            this.gameWorld.updateRigidBodyMeshToSimulation();           // update rigid bodies mesh position according to physics simulation
+            //this.gameWorld.updateRigidBodyMeshToSimulation();                 // update rigid bodies mesh position according to physics simulation ( NOT IN USE )
 
             this.player.playerControls.updatePlayerMotion( this.gameWorld, this.delta );    //  move player according to user input
         
@@ -301,7 +324,9 @@ export default class level {
 
     }
 
-    // dispose function for level
+
+    // PURPOSE: Call disposal functions for LevelManager-owned objects, hide and dispose of in-game menus, abort listeners, ammo garbage disposal
+    // USED BY: main.js
     disposeLevel() {
 
         this.gameWorld.disposeWorld();      // dispose scene
@@ -333,6 +358,7 @@ export default class level {
         this.deadMenu = null;
         this.levelCompleteMenu = null;
         this.hud = null;
+
     }
 
 }

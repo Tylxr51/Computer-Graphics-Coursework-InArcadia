@@ -1,5 +1,4 @@
 uniform float uTime;
-uniform vec3 uColor;
 uniform sampler2D uScreen;
 uniform float isFlickerOn;
 
@@ -200,7 +199,7 @@ void main() {
     ///////////////////////////////// 
 
     // calculate pixel color using texture, scanline, vignette, flicker
-    vec3 color = textureColor * uColor * scanline * vignette * flicker;  
+    vec3 color = textureColor * scanline * vignette * flicker;  
 
 
 

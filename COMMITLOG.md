@@ -1,5 +1,10 @@
 # Commit Log
 
+#### 14.01.26
+
+- Reorganised project folder structure.
+- Refactored all js files and added comments for each function
+
 #### 13.01.26
 
 - Created separate files for level0 and leve1 scene generation.

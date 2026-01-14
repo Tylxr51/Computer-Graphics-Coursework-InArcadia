@@ -1,30 +1,34 @@
 import * as THREE from 'three';
-import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from '/js/objectSpawner.js'
+import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate } from './objectSpawner.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
  
 
+
 export default function createSceneLevel1( args ) {
 
+    // unpack args
     const { gameWorld,
-        player,
-        playerSpawnY,
-        playerSize,
-        colorHue
-        } = args;
+            player,
+            playerSpawnY,
+            playerSize,
+            colorHue
+          } = args;
 
 
-    const trackWidth = 2.00;     // width of floorpieces
-    const trackZCentre = 0.00;
+    // define variables used throughout level
+    const trackWidth = 2.00;        // width of floorpieces
+    const trackZCentre = 0.00;      // centre point of track
 
+    // define some variables for ImagePlates that are used frequently
     const defaultImagePlateSize = [ 4, 4 ];
     const defaultImageRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 1, 0 ), -Math.PI/2 );
+
 
     //////////////////////////////////////
     /////////// OUT OF BOUNDS ////////////
     //////////////////////////////////////
 
     const outOfBoundsPlatform = new OutOfBoundsPlatform( gameWorld, player );
-
 
 
     //////////////////////////////////////
@@ -34,7 +38,6 @@ export default function createSceneLevel1( args ) {
     const screen = new Screen( gameWorld )
 
 
-
     //////////////////////////////////////
     /////////// SPAWN PLATFORM ///////////
     //////////////////////////////////////
@@ -42,13 +45,12 @@ export default function createSceneLevel1( args ) {
     ///// POSITION AND SIZE VARIABLES /////
 
     const spawnPlatformXStart = -0.50;
-    
-    
+
+
     ///// CREATE FLOOR PIECES & DOOR //////
-    
+
     // create spawn door and spawn platform
     const spawnArea = new SpawnArea( gameWorld, spawnPlatformXStart, playerSpawnY, playerSize.y, trackZCentre );
-
 
 
     ///////////////////////////////////////
@@ -62,29 +64,28 @@ export default function createSceneLevel1( args ) {
     const lowerSectionY = 0.00;
 
     const gapToMazeStartDistance = 1.00;
-    
-    
+
+
     ///////// CREATE FLOOR PIECES /////////
-    
+
     // player drops from spawn area
-    
+
     // floor piece player lands on to
     const firstFloor         =   new FloorPiece( gameWorld, 
                                                 [ firstFloorXStart, lowerSectionY, trackZCentre ], 
                                                 [ firstFloorXLength, 1.0, trackWidth ],
                                                 colorHue
                                                 );
-    
+
     // gap to walk jump across into maze
-    
-    
-    
+
+
     ///////////////////////////////////////
     ////////////// MAZE FRAME /////////////
     ///////////////////////////////////////
-    
+
     ///// POSITION AND SIZE VARIABLES /////
-    
+
     const mazeFrameThickness = 1.0;
     const mazePlatformThickness = mazeFrameThickness / 2;
 
@@ -142,7 +143,7 @@ export default function createSceneLevel1( args ) {
                                                 [ mazeFrameThickness, mazeBackWallHeight, trackWidth ],
                                                 colorHue
                                                 );
-    
+
     const mazeLeftWall       =   new FloorPiece( gameWorld,
                                                 [ mazeLeftWallXStart, mazeLeftWallY, mazeLeftWallZCentre ],
                                                 [ mazeLeftWallXLength, mazeLeftWallHeight, mazePlatformThickness / 2 ],
@@ -162,6 +163,8 @@ export default function createSceneLevel1( args ) {
     ///////////////////////////////////////
     /////////// LOWER SECTION /////////////
     ///////////////////////////////////////
+
+    ///// POSITION AND SIZE VARIABLES /////
 
     const mazeLowerToMiddleJumpPlatformXStart = mazeLowerFloorXStart + 10.0;
     const mazeLowerToMiddleJumpPlatformXLength = 4;
@@ -191,6 +194,10 @@ export default function createSceneLevel1( args ) {
     const nothingDownHereX = mazeBackWallXStart - 0.05;
     const nothingDownHereY = mazeLowerBigBoxY + 1.0;
 
+
+
+    ///////// CREATE FLOOR PIECES /////////
+
     const mazeLowerToMiddleJumpPlatform  =   new FloorPiece( gameWorld, 
                                                             [ mazeLowerToMiddleJumpPlatformXStart, mazeLowerToMiddleJumpPlatformY, trackZCentre - mazeLowerToMiddleJumpPlatformZLength ],
                                                             [ mazeLowerToMiddleJumpPlatformXLength, mazeLowerToMiddleJumpPlatformJumpHeight, mazeLowerToMiddleJumpPlatformZLength],
@@ -202,12 +209,13 @@ export default function createSceneLevel1( args ) {
                                                             [ mazeLowerSmallBoxXLength, mazeLowerSmallBoxHeight, mazeLowerSmallBoxZLength],
                                                             colorHue
                                                         );
-    
+
     const mazeLowerBigBox        =       new FloorPiece ( gameWorld, 
                                                             [ mazeLowerBigBoxXStart, mazeLowerBigBoxY, trackZCentre + mazeLowerBigBoxZLength],
                                                             [ mazeLowerBigBoxXLength, mazeLowerBigBoxHeight, mazeLowerBigBoxZLength],
                                                             colorHue
                                                         );
+
 
 
     ///////// CREATE IMAGE PLATE /////////
@@ -231,6 +239,8 @@ export default function createSceneLevel1( args ) {
     /////////// MIDDLE SECTION ////////////
     ///////////////////////////////////////
 
+    ///// POSITION AND SIZE VARIABLES /////
+
     const mazePlatformtoMiddleFloorJumpHeight = 1.5;
 
     const mazeMiddleFloorFrontSectionXStart = mazeLowerFloorXStart + mazeFrameThickness;
@@ -250,6 +260,10 @@ export default function createSceneLevel1( args ) {
     const mazeMiddleWallToUpperHeight = 8.3;
     const mazeMiddleWallToUpperY = mazeMiddleFloorBackSectionY + mazeMiddleWallToUpperHeight;
     const mazeMiddleWallToUpperOpeningHeight = 1.5;
+
+
+
+    ///////// CREATE FLOOR PIECES /////////
 
     const mazeMiddleFloorFrontSection    =   new FloorPiece( gameWorld,
                                                             [ mazeMiddleFloorFrontSectionXStart, mazeMiddleFloorFrontSectionY, trackZCentre ],
@@ -275,9 +289,12 @@ export default function createSceneLevel1( args ) {
                                                             colorHue
                                                             );
 
+
     ///////////////////////////////////////
     /////////// PARKOUR SECTION ///////////
     ///////////////////////////////////////
+
+    ///// POSITION AND SIZE VARIABLES /////
 
     const parkourStartingBoxXLength = 2.0;
     const parkourStartingBoxXStart = mazeMiddleWallToUpperXStart - parkourStartingBoxXLength;
@@ -333,26 +350,28 @@ export default function createSceneLevel1( args ) {
     const arcingArrowLeftUpperRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), -Math.PI / 8 );
     const arcingArrowRightUpperRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), Math.PI / 6 );
 
-    
-    
+
+
+    ///////// CREATE FLOOR PIECES /////////
+
     const parkourStartingBox             =   new FloorPiece( gameWorld,
                                                             [ parkourStartingBoxXStart, parkourStartingBoxY, parkourStartingBoxZCentre ],
                                                             [ parkourStartingBoxXLength, parkourStartingBoxHeight, parkourStartingBoxZLength ],
                                                             colorHue
                                                             );
-    
+
     const parkourPlatformAfterBox        =   new FloorPiece( gameWorld,
                                                             [ parkourPlatformAfterBoxXStart, parkourPlatformAfterBoxY, parkourPlatformAfterBoxZCentre ],
                                                             [ parkourSmallPlatformXLength, mazePlatformThickness, parkourSmallPlatformZLength ],
                                                             colorHue
                                                             );
-    
+
     const firstWidePlatformAfterBox      =   new FloorPiece( gameWorld,
                                                             [ firstWidePlatformXStart, firstWidePlatformY, parkourWidePlatformZCentre ],
                                                             [ parkourWidePlatformXLength, mazePlatformThickness, parkourWidePlatformZLength ],
                                                             colorHue
                                                             );
-    
+
     const firstPlatformAfterFirstWide    =   new FloorPiece( gameWorld,
                                                             [ firstPlatformAfterFirstWideXStart, firstPlatformAfterFirstWideY, parkourPlatformAfterBoxZCentre ],
                                                             [ parkourSmallPlatformXLength, mazePlatformThickness, parkourSmallPlatformZLength ],
@@ -364,7 +383,7 @@ export default function createSceneLevel1( args ) {
                                                             [ 2 * parkourSmallPlatformXLength, mazePlatformThickness, parkourSmallPlatformZLength ],
                                                             colorHue
                                                             );
-    
+
     const secondPlatformAfterFirstWide    =   new FloorPiece( gameWorld,
                                                             [ secondPlatformAfterFirstWideXStart, secondPlatformAfterFirstWideY, parkourPlatformAfterBoxZCentre ],
                                                             [ parkourSmallPlatformXLength, mazePlatformThickness, parkourSmallPlatformZLength ],
@@ -376,6 +395,7 @@ export default function createSceneLevel1( args ) {
                                                             [ parkourWidePlatformXLength, mazePlatformThickness, parkourWidePlatformZLength ],
                                                             colorHue
                                                             );
+
 
 
     ///////// CREATE IMAGE PLATE /////////
@@ -402,19 +422,19 @@ export default function createSceneLevel1( args ) {
                                                                 );
 
     const arcingArrowRightUpper               =   new ImagePlate( gameWorld,
-                                                                  [ 2.5, 3 ],
-                                                                  [ arcingArrowRightUpperX, arcingArrowRightUpperY, longPlatformAfterFirstWideZCentre - 1.5 ], 
-                                                                  arcingArrowUpperRotationMatrix.multiply( arcingArrowRightUpperRotationMatrix ), 
-                                                                  'arcing_arrow_right'
+                                                                [ 2.5, 3 ],
+                                                                [ arcingArrowRightUpperX, arcingArrowRightUpperY, longPlatformAfterFirstWideZCentre - 1.5 ], 
+                                                                arcingArrowUpperRotationMatrix.multiply( arcingArrowRightUpperRotationMatrix ), 
+                                                                'arcing_arrow_right'
                                                                 );
-    
-    
-    
+
+
     ///////////////////////////////////////
     ////////////// STAIRCASE //////////////
     ///////////////////////////////////////
 
-    
+    ///// POSITION AND SIZE VARIABLES /////
+
     const jumpToFirstStaicase = 1.5;
 
     const firstStaircaseToUpperXStart = secondWidePlatformXStart + parkourWidePlatformXLength + jumpToFirstStaicase;
@@ -436,7 +456,10 @@ export default function createSceneLevel1( args ) {
     const secondStaircaseToUpperHeight = secondStaircaseToUpperNumOfSteps * 0.15;
     const secondStaircaseToUpperXLength = secondStaircaseToUpperNumOfSteps * secondStaircaseToUpperStepDepth;
 
-    
+
+
+    ///////// CREATE FLOOR PIECES /////////
+
     const firstStaircaseToUpper          =   new Staircase( gameWorld, 
                                                             [ firstStaircaseToUpperXStart, secondWidePlatformY, parkourWidePlatformZCentre ], 
                                                             firstStaircaseToUpperNumOfSteps, 
@@ -465,6 +488,8 @@ export default function createSceneLevel1( args ) {
     //////////// UPPER SECTION ////////////
     ///////////////////////////////////////
 
+    ///// POSITION AND SIZE VARIABLES /////
+
     const upperFloorSectionXStart = mazeMiddleWallToUpperXStart + mazePlatformThickness;
     const upperFloorSectionXLength = mazeBackWallXStart - upperFloorSectionXStart;
     const upperFloorSectionY = staircaseHalfStepY + secondStaircaseToUpperHeight;
@@ -481,6 +506,9 @@ export default function createSceneLevel1( args ) {
     const ifOnlyCameraAngleX = mazeBackWallXStart - 0.05;
     const ifOnlyCameraAngleY = upperFloorSectionY + 1.2;
 
+
+
+    ///////// CREATE FLOOR PIECES /////////
 
     const upperFloorSection              =   new FloorPiece( gameWorld, 
                                                             [ upperFloorSectionXStart, upperFloorSectionY, trackZCentre ],
@@ -501,6 +529,7 @@ export default function createSceneLevel1( args ) {
                                                                 );
 
 
+
     ///////// CREATE IMAGE PLATE /////////
 
     const ifOnlyCameraAngle        =   new ImagePlate( gameWorld,
@@ -510,9 +539,12 @@ export default function createSceneLevel1( args ) {
                                                         'if_only_camera_angle'
                                                     );
 
+
     ///////////////////////////////////////
     ///////////////// TUBE ////////////////
     ///////////////////////////////////////
+
+    ///// POSITION AND SIZE VARIABLES /////
 
     const tubeWallThickness = 0.10;
     const tubeWallLength = 1.0;
@@ -533,8 +565,10 @@ export default function createSceneLevel1( args ) {
     const arrowIntoTubeX = tubeLeftWallXStart + tubeWallLength;
     const arrowIntoTubeY = tubeRaisedWallY + 2.5;
     const arrowIntoTubeRotationMatrix = new THREE.Matrix4().makeRotationAxis( new THREE.Vector3( 0, 0, 1 ), Math.PI );
-    
 
+
+
+    ///////// CREATE FLOOR PIECES /////////
 
     const tubeBackWall      =   new FloorPiece( gameWorld, 
                                                 [ tubeBackWallXStart, tubeRaisedWallY, tubeBackWallZCentre ], 
@@ -561,11 +595,11 @@ export default function createSceneLevel1( args ) {
     ///////// CREATE IMAGE PLATE /////////
 
     const arrowIntoTube        =   new ImagePlate( gameWorld,
-                                                   [ 4, 6 ],
-                                                   [ arrowIntoTubeX, arrowIntoTubeY, tubeLeftWallZCentre + 0.2 ], 
-                                                   arrowIntoTubeRotationMatrix, 
-                                                   'straight_arrow'
-                                                 );
+                                                    [ 4, 6 ],
+                                                    [ arrowIntoTubeX, arrowIntoTubeY, tubeLeftWallZCentre + 0.2 ], 
+                                                    arrowIntoTubeRotationMatrix, 
+                                                    'straight_arrow'
+                                                );
 
 
 
@@ -583,12 +617,12 @@ export default function createSceneLevel1( args ) {
     const levelCompletePlatform = new LevelCompletePlatform( gameWorld, 
                                                             player, 
                                                             [ levelCompletePlatformXStart,
-                                                              levelCompletePlatformY,
-                                                              levelCompleteZCentre
+                                                            levelCompletePlatformY,
+                                                            levelCompleteZCentre
                                                             ], 
                                                             [ levelCompletePlatformXLength,
-                                                              levelCompletePlatformThickness,
-                                                              levelCompleteZLength
+                                                            levelCompletePlatformThickness,
+                                                            levelCompleteZLength
                                                             ]
                                                             );
         

@@ -1,10 +1,14 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js'; 
-import { PlayerGLTF } from '/js/objectSpawner.js'
+import { PlayerGLTF } from './objectSpawner.js'
 
+
+
+// PURPOSE: Handles player objects such as physics body, wireframe mesh, and GLTF mesh, and has function for (re)spawning player
+// USED BY: LevelManager
 export default class Player {
     
-    // initialise player
+    // Create player physics body, player wireframe mesh, and player GLTF mesh
     constructor(size, gameWorld) {
 
         this.playerIsDead = false;      // variable to track if player is dead for menu logic
@@ -49,24 +53,25 @@ export default class Player {
         ////////////// PLAYER WIREFRAME MESH ///////////////
 
         // set up wireframe capsule mesh to represent player (used for debugging purposes, set to transparent when debugger is off)
-        this.playerGeometry = new THREE.CapsuleGeometry( this.playerRadius, this.playerHeight, 2, 8, 1 );
-        this.playerWireframe = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+        const playerGeometry = new THREE.CapsuleGeometry( this.playerRadius, this.playerHeight, 2, 8, 1 );
+        const playerWireframe = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
 
-        this.playerWireframe.transparent = !debug;          // make transparent if debug is on
-        this.playerWireframe.opacity = Number( debug );     // have to set opacity to 0 as well to make it transparent
+        playerWireframe.transparent = !debug;          // make transparent if debug is on
+        playerWireframe.opacity = Number( debug );     // have to set opacity to 0 as well to make it transparent
 
-        this.playerMesh = new THREE.Mesh( this.playerGeometry, this.playerWireframe );
+        this.playerMesh = new THREE.Mesh( playerGeometry, playerWireframe );
 
 
 
         ///////////////// PLAYER GLTF MESH /////////////////
 
-        this.playerGLTFMesh = new PlayerGLTF( this.gameWorld );
+        this.playerGLTFMesh = new PlayerGLTF( this.gameWorld );         // create player GLTF Model
 
 
 
         //////////// INITIALISE PLAYER CONTROLS ////////////
 
+        // create playerControls
         this.playerControls = new PlayerControls( this, 
                                                   this.gameWorld.firstPersonCamera, 
                                                   this.gameWorld.renderer, 
@@ -75,10 +80,12 @@ export default class Player {
 
     }
 
-    // player spawning function
+
+    // PURPOSE: Handles the cameras, scene, renderer, and physics simulation
+    // USED BY: LevelManager.buildBackend() and DeadGameMenu.onRespawnButtonClick()
     spawnPlayer( isInitialSpawn, ammoPlayerSpawnPosition, ammoPlayerSpawnQuaternion ) {
 
-        // set spawn position (don't have to worry about orientation as ghost object never rotates, only camera)
+        // set spawn position ( don't have to worry about orientation as ghost object never rotates, only camera )
         this.transform.setIdentity();
         this.transform.setOrigin( ammoPlayerSpawnPosition );
 
@@ -106,15 +113,19 @@ export default class Player {
 
             // add player mesh to scene
             this.gameWorld.scene.add( this.playerMesh );
+
         }
 
         // create a new document wide event to swap to first person camera on spawn
         document.dispatchEvent( new CustomEvent( 'spawn-set-first-person-camera' ) );
 
         this.playerIsDead = false;
+        
     }
 
-    // player disposal function
+
+    // PURPOSE: Call playerControls disposal function, ammo garbage collection, and set variables to null
+    // USED BY: levelManager.disposeLevel()
     disposePlayer() {
 
         this.playerControls.disposePlayerControls();    // dispose playerControls
@@ -137,8 +148,12 @@ export default class Player {
 
 }
 
+
+// PURPOSE: Handles inputs relating to player movement and mouse movement, calculates player motion, handles sprint and dash calculations, and can enable and disable movement 
+// USED BY: Called by levelManager on level exit
 class PlayerControls {
 
+    // PURPOSE: initialise variables for player controls
     constructor( player, camera, renderer, movementController ) {
 
         // set up player, camera, renderer, controllers, and camera controls
@@ -201,7 +216,8 @@ class PlayerControls {
 
     }
 
-    // function for key down events relating to player movement
+    // PURPOSE: Checks which movement key has been pressed down and updates variables accordingly
+    // USED BY: keydown listener ( defined in turnOnMovement() )
     onKeyDown = ( event ) => {
 
         // check key pressed
@@ -242,6 +258,7 @@ class PlayerControls {
             // jump
             case 'Space':
 
+                // check if player can jump
                  if ( this.canJump === true ) { 
                     
                     this.movementController.jump(); 
@@ -249,7 +266,6 @@ class PlayerControls {
                     this.canJump = false;
                 
                 }
-
 
                  break;
 
@@ -266,7 +282,9 @@ class PlayerControls {
         }
     }
 
-    // function for key up events
+
+    // PURPOSE: Checks which movement key has been released and updates variables accordingly
+    // USED BY: keydown listener ( defined in turnOnMovement() )
     onKeyUp = (event) => {
 
         // check key pressed
@@ -307,26 +325,35 @@ class PlayerControls {
         }
     }
 
-    // disable movement listeners for menu screens
+    // PURPOSE: Disables player and camera movement by removing keydown and keyup listeners and setting mouse sensitivity to 0
+    // USED BY: LevelManager.useFirstPersonCamera() and LevelManager.useThirdPersonCamera()
     turnOffMovement() {
 
         // remove movement listeners
         document.removeEventListener( 'keydown', this.onKeyDown );
         document.removeEventListener( 'keyup', this.onKeyUp );
 
+        this.player.playerControls.cameraController.pointerSpeed = 0;    // turn off mouse movement
+
         // stop movement
         this.moveForward = this.moveBackward = this.moveLeft = this.moveRight = false;
     }
 
-    // enable movement listeners for gameplay
+
+    // PURPOSE: Enables player and camera movement by adding keydown and keyup listeners and setting mouse sensitivity to value defined in globalVariables.js
+    // USED BY: LevelManager.useFirstPersonCamera() and LevelManager.useThirdPersonCamera()
     turnOnMovement() {
 
         // add movement listeners
         document.addEventListener( 'keydown', this.onKeyDown );
         document.addEventListener( 'keyup', this.onKeyUp );
+
+        this.player.playerControls.cameraController.pointerSpeed = mouseControlsSensitivity;    // turn on mouse movement
+
     }
 
-    // function that is called each gameloop that checks if player is dashing
+    // PURPOSE: Handles dash logic - checks if player is starting a dash, dashing, or not dashing and calculates movement speed and FOV accordingly
+    // USED BY: LevelManager.gameloop()
     dashLogic( delta ) {
 
         // initiate dash if key has just been pressed
@@ -350,13 +377,12 @@ class PlayerControls {
         this.timeSinceDash = this.dashTimer.getElapsedTime();
         this.dashRechargeProgress =  THREE.MathUtils.clamp( ( this.timeSinceDash / dashCooldown ), 0, 1 ) * 100
 
+        // set canDash to true only when dash has recharged
         if ( this.dashRechargeProgress < 100 ) { this.canDash = false }
         else { this.canDash = true };
 
-        
         // if not dashing then return
         if ( !this.dash ) { return };
-        
         
         // only increase fov for a short period so it feels like a short and quick acceleration
         if ( this.dashTimer.getElapsedTime() < 0.07 ) { this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, dashFOV, 1 - Math.exp( - this.FOVDashChangeSpeed * delta ) ) };
@@ -376,10 +402,12 @@ class PlayerControls {
             this.currentDashSpeed = this.dashSpeed;
             this.movementSpeed = this.walkSpeed;
         }
-        
 
     }
 
+
+    // PURPOSE: Handles sprint logic - checks if player is sprinting or walking and calculates movement speed and FOV accordingly
+    // USED BY: LevelManager.gameloop()
     sprintLogic( delta ) {
 
         // set default movementSpeed and get currentFOV
@@ -417,9 +445,16 @@ class PlayerControls {
                 this.currentFOV = THREE.MathUtils.lerp( this.camera.fov, walkFOV, 1 - Math.exp( - this.FOVWalkRunChangeSpeed * delta ) );
             
             }
+
         }
+
     }
 
+
+    // PURPOSE: Updates player motion - gets lookDirection and inputDirection, calls sprintLogic() and dashLogic() to set movementSpeed, and
+    //          sets player walkDirection, updates FOV according to sprintLogic and dashLogic, updates player wireframe material and player GLTF mesh
+    //          and updates thirdPersonCamera location
+    // USED BY: LevelManager.gameloop()
     updatePlayerMotion( gameWorld, delta ) {
         
         // get FOV
@@ -497,7 +532,9 @@ class PlayerControls {
         this.canJump = ( this.movementController.onGround() );  
     }
 
-    // player controls disposal function
+
+    // PURPOSE: Unlock user cursor, dispose of camera controls, set variables to null, ammo garbage disposal, and turn off movement ( removes movement listeners )
+    // USED BY: Player.disposePlayer()
     disposePlayerControls() {
         
         // set variables to null
