@@ -103,7 +103,11 @@ export default class Player {
                                         ammoPlayerSpawnQuaternion.z(), 
                                         ammoPlayerSpawnQuaternion.w()
                                     );
-
+    
+        // stop momentum carry-over on respawn
+        const killPlayerMovementVec = new Ammo.btVector3( 0, 0, 0 );
+        this.movementController.setWalkDirection( killPlayerMovementVec );
+        Ammo.destroy( killPlayerMovementVec )
 
         // check if spawning for the first time
         if ( isInitialSpawn ) {
