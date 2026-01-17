@@ -1,0 +1,165 @@
+%% Creator: Inkscape 1.4.3 (0d15f75, 2025-12-25), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'InArcadia_Flowchart_svg-tex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{1027.5bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.73868613)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.44379562,0.71970803){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}main()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.36058394,0.69051095){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}load packages\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.36058394,0.66131387){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}create main menus\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.36058394,0.63211679){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}show main menu and await trigger\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.36058394,0.60291971){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}create levelManager\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.02116788,0.69014599){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.09343066,0.68394161){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}MainMainMenu...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.33576642,0.66824818){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.58978102,0.52992701){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}LevelManager\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.55109489,0.60985401){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.58978102,0.44233577){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}constructor()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.53576642,0.41313869){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}build level backend\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.53576642,0.38394161){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}choose level scene\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.53576642,0.35474453){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}start gameloop\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.58029197,0.49379562){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.4,0.41313869){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}World\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.48832117,0.42007299){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.7649635,0.38394161){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}createLevelXScene()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.66350365,0.39087591){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=20]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.4,0.3620438){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Player\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=21]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.48832117,0.36824818){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=22]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.2540146,0.3620438){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}PlayerControls\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=23]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.34233577,0.3689781){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=24]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.35620438,0.26751825){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=25]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.37080292,0.30437956){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}InstructionsGameMenu...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=26]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.48832117,0.30985401){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=27]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.66350365,0.36167883){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=28]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.63357664,0.69051095){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}loadPackages()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=29]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.54671533,0.69744526){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=30]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.93904379,0.17956204){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}update physics\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=31]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.93904379,0.13576642){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}update player motion\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=32]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.83868613,0.18649635){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=33]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.83868613,0.14343066){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=34]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.93904379,0.0919708){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}check player collisions\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=35]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.83868613,0.09817518){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=36]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.70656934,0.26715328){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}gameloop()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=37]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.62335766,0.2379562){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}stop game?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=38]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.62335766,0.20875912){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}queue next gameloop() call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=39]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.62335766,0.17956204){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}perform calculations for current frame\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=40]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.44525547,0.04051095){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Yes\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=41]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.51678832,0.03430657){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}player completed level?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=42]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.92408759,0.07043796){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Check\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=43]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.09343066,0.57372263){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}event triggers\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=44]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.60510949,0.21569343){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Create\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=45]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.51678832,0.20875912){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}call gameloop()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=46]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.50729927,0.07481752){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}No\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=47]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.37080292,0.20875912){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}event triggers\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=48]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.16715328,0.21569343){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=49]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.22481752,0.20875912){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}exitLevel()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=50]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.15766423,0.57992701){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Trigger\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=51]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.19635036,0.63759124){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=52]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.2540146,0.63211679){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}showMenu()\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=53]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.34233577,0.63832117){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Call\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=54]{InArcadia_Flowchart_svg-tex.pdf}}%
+    \put(0.30583942,0.21569343){\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Trigger\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

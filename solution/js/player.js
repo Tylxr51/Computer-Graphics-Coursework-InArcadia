@@ -56,9 +56,6 @@ export default class Player {
         const playerGeometry = new THREE.CapsuleGeometry( this.playerRadius, this.playerHeight, 2, 8, 1 );
         const playerWireframe = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
 
-        playerWireframe.transparent = !debug;          // make transparent if debug is on
-        playerWireframe.opacity = Number( debug );     // have to set opacity to 0 as well to make it transparent
-
         this.playerMesh = new THREE.Mesh( playerGeometry, playerWireframe );
 
 
@@ -116,7 +113,7 @@ export default class Player {
             this.gameWorld.physicsWorld.addAction( this.movementController );
 
             // add player mesh to scene
-            this.gameWorld.scene.add( this.playerMesh );
+            if ( debug ) { this.gameWorld.scene.add( this.playerMesh ) };
 
         }
 

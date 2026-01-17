@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate, GeneralLevelLighting } from './objectSpawner.js'
-import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
  
 
-
-export default function createSceneLevel1( args ) {
+// PURPOSE: Create environment objects for level 1
+// USED BY: LevelManager.chooseLevelScene()
+export function createLevel1Scene( args ) {
 
     // unpack args
     const { gameWorld,
@@ -25,6 +25,18 @@ export default function createSceneLevel1( args ) {
 
 
     //////////////////////////////////////
+    ///////////// BACKGROUND /////////////
+    //////////////////////////////////////
+
+    const backgroundColor = 0x000000;
+    const fogColor = 0x000000;
+
+    gameWorld.scene.background = new THREE.Color( backgroundColor );
+    if ( !debug ) { gameWorld.scene.fog.color.set( fogColor ) };
+
+
+
+    //////////////////////////////////////
     /////////// OUT OF BOUNDS ////////////
     //////////////////////////////////////
 
@@ -35,7 +47,7 @@ export default function createSceneLevel1( args ) {
     /////////////// SCREEN ///////////////
     //////////////////////////////////////
 
-    const screen = new Screen( gameWorld )
+    const screen = new Screen( gameWorld, loadedTextures['screen_arcade_image'] )
 
 
     //////////////////////////////////////
@@ -632,7 +644,9 @@ export default function createSceneLevel1( args ) {
     ///////// GENERAL LIGHTING ///////////
     //////////////////////////////////////
     
-    const levelLighting = new GeneralLevelLighting( gameWorld );
+    const skyColor = 0xff0000;
+    const groundColor = 0x0000ff;
+    const levelLighting = new GeneralLevelLighting( gameWorld, skyColor, groundColor );
 
 
 
@@ -648,5 +662,51 @@ export default function createSceneLevel1( args ) {
 
 
     return { screen, levelCompletePlatform, outOfBoundsPlatform }
+
+}
+
+// PURPOSE: create floor meshes for level 1
+// USED BY: FloorPiece.createFloorMesh()
+export function createLevel1FloorMesh( floorSize, colorHue, colorLightness ) {
+
+    let floorGeometry = new THREE.BoxGeometry( floorSize.x, 
+                                               floorSize.y, 
+                                               floorSize.z 
+                                             );
+
+    let color = new THREE.Color();                          // make color object to populate later
+        
+    floorGeometry = floorGeometry.toNonIndexed();           // gives a triangle/square effect
+
+    const position = floorGeometry.attributes.position;     // get vertex position 
+
+    const colors = [];                                      // list to populate
+
+    for ( let i = 0, l = position.count; i < l; i ++ ) {
+
+        // set vertex color
+        color.setHSL(  colorHue + Math.random() * 0.2, 
+                       0.75, 
+                       colorLightness + Math.random() * 0.3, 
+                       THREE.SRGBColorSpace 
+                    );
+        colors.push( color.r, color.g, color.b );           // populate colors list
+
+    }
+
+    // set vertex colors from list
+    floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+    // make material from vertex colors
+    const floorMaterial = new THREE.MeshStandardMaterial( { color: 0xbcbcbc, roughness: 0.1, metalness: 0.3, vertexColors: true  } );
+    floorMaterial.castShadow = false;
+    floorMaterial.receiveShadow = true;
+
+    // make floorMesh using floorGeometry and floorMaterial
+    const floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
+
+
+
+    return floorMesh
 
 }

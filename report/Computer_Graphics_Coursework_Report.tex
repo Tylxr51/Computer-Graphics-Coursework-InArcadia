@@ -1,0 +1,468 @@
+\documentclass[a4paper,11pt]{article}
+
+\title{
+  Computer Graphics Coursework\\\color{white}\tiny.\\\color{black}\normalsize
+  \large \textsc{InArcadia}}
+\author{Tyler Graves u2202289 \\ \small Year 3 Mathematics }
+
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=20mm,
+ top=20mm,
+ }
+\usepackage{comment}
+
+\usepackage{svg}
+\setsvg{
+  inkscape = /Applications/Inkscape.app/Contents/MacOS/inkscape
+}
+
+\usepackage{amsopn} % used for the \DeclareMathOperator command
+
+\usepackage{xcolor} % used for the \textcolor{...} command 
+\usepackage{changepage}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\captionsetup{justification=centering}
+\usepackage{subcaption}
+\graphicspath{ {./latex/Images/pdfs} }
+
+\usepackage{hyperref}
+
+\usepackage{listings}
+
+\usepackage{forest}
+
+
+
+\begin{document}   
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+
+
+\section{Instructions}
+
+\subsection{Project Structure}
+
+The .zip file submitted has the following structure (as specified in the coursework brief) :
+\vspace{1pt}
+
+\begin{forest}
+for tree={
+  font=\ttfamily\footnotesize,
+  grow'=0,
+  child anchor=west,
+  parent anchor=south,
+  calign=first,
+  inner sep=2pt,
+  l sep=2pt,
+  s sep=2pt,
+  edge path={
+    \noexpand\path[draw]
+    (!u.south) |- (.child anchor);
+  },
+  before typesetting nodes={
+    if n=1
+      {insert before={[,phantom]}}
+      {}
+  },
+  fit=band,
+}
+[ \text{[project root]}
+  [assets
+  		[models
+   			[blend\_files
+	    		[\ldots, edge=none]
+    		]
+			[glb\_files
+				[\ldots]	
+			]    
+    	]
+    	[shaders
+    		[\ldots]
+    	]
+    	[textures
+    		[png\_files
+    			[\ldots]
+    		]
+    		[psd\_files
+    			[\ldots]
+    		]
+    	]
+  ]
+  [solution
+    	[index.html, label=right:{\textcolor{red}{\hspace{5pt} \footnotesize{[entry point]}}}]
+    	[css
+	    	[\ldots]
+    	]
+    	[js
+	    	[\ldots]
+    	]
+  ]
+  [three.js-r170
+		[build
+			[\ldots]
+		]
+		[docs
+			[\ldots]	
+		]
+		[\ldots]  
+  ]
+  [code\_report.pdf]
+]
+
+\end{forest}
+
+\noindent \verb+./solution/+ contains .js, .html, and .css files.
+
+\noindent \verb+./assets/+ contains .blend, .glb, .glsl, .png, and .psd files.
+
+\noindent \verb+./three.js-r170+ contains version r170 of three.js.
+
+\noindent This structure must be preserved in order for the program to run without error.
+
+\subsection{Launching the Game}
+
+After unzipping the submitted .zip file, open a terminal in the project root directory (containing \verb+./assets, ./solution, ...+). Here,  run a local server - assuming Python 3.x is installed, this can be done by simply running:
+\lstset{
+  xleftmargin=.1\textwidth
+}
+\begin{lstlisting}
+python -m http.server 8000
+\end{lstlisting}
+\noindent If port 8000 is already in use, choose an appropriate alternative. The following message should be displayed:
+\begin{lstlisting}
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+\end{lstlisting}
+Now, open a browser and, in the address bar, type \verb+http://localhost:8000/solution/+. You should see the game's main menu screen.\footnote{This was tested on the DCS Linux machines with Google Chrome on 16.01.26}
+
+
+
+
+
+
+
+
+\newpage
+
+\section{Project Breakdown}
+
+\subsection{Game Overview}
+In the game, you play as a video game character inside of an arcade machine. You spawn out of a mysterious door in the sky and must reach the end of the track to complete the level. You navigate the environment by walking, jumping, sprinting, and dashing, and can gain more information about your surroundings by toggling between two different camera views: a first person view from the character's perspective, and a third person view from the arcade machine screen.
+
+This gameplay was inspired by the movement in games like Ghost Runner, and the concept of being stuck in an arcade machine was inspired by the brief requesting two camera angles.\citep{website:patronus}
+
+\subsection{High-Level Code Structure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/InArcadia_Flowchart.png}  
+	\caption{Simplified game lifecycle flowchart}\\
+	\label{fig:flowchart}
+\end{figure}
+
+Figure \ref{fig:flowchart} shows a simplified version of the game's lifecycle - from startup, to loading a level, to exiting back to the main menu. 
+
+When the application is started, main() is called in main.js which loads assets, creates and shows the main menu, and awaits a response. Once the user selects a level, the menu triggers the loadLevel() function in main.js which creates a LevelManager. 
+
+The LevelManager then calls its constructor() function which initialises the level by creating World, Player, and in-game Menu objects and calling the appropriate createLevelXScene() function. It then starts the gameloop.
+
+The gameloop first checks if the game should stop. If so, it triggers exitLevel() in main.js and shows the main menu. Otherwise, it queues the next gameloop() function call, and performs calculations for the current frame. The current frame is then rendered, and the queued gameloop() function call is executed, creating a loop.
+
+\subsection{Detailed Code Breakdown}
+
+\subsubsection{Level Generation}
+
+TALKING POINTS FOR EACH FILE:
+	- buildWorld
+		- makes two cameras and adds to array
+		- creates a scene with fog
+		- physics initialisation
+	- level generation and object spawner in one
+		- uses classes from object spawner to create all scene objects in the level
+		- this includes: screen, track, spawn platform, outofboundsplatform, levelcompleteplatform, imageplates
+	- level manager
+		- created and takes over from main when level is selected
+		- creates gameworld, player, level environment
+		- handles level events such as game pausing, player dying, camera switching, player (re)spawning
+		- controls the gameloop
+	- menus
+		- handles the main and game menus
+		- creates classes that are used in main and level manager to create levels
+		- all the classes do is toggle html screens on and off and provide logic for the buttons
+		- also contains the HUD logic
+	- player
+		- creates the player's physics body, debug mesh, and player character
+		- handles (re)spawning of character
+		- creates player controls which handles all player movement
+		- defines listeners for mouse and key input and contains movement logic, including sprint and dash mechanics
+		- updates player location and camera locations based on input
+		
+\subsubsection{html, css, and glsl}
+- very briefly cover html and css. go into detail a bit more on glsl (mention why it is in assets)
+
+\subsubsection{textures and models}
+- briefly explain pipeline for making textures: goodnotes -> photopea. Explain blender model
+	
+
+
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040028.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040568.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050447.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040713.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050382.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050184.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050129.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050086.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040256.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040948.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040941.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040933.JPG}
+	\end{subfigure}
+\end{figure}
+\newpage
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040924.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040923.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040914.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040894.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040873.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040739.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050410.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040705.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050477.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040552.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040358.JPG}
+	\end{subfigure}\\
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040264.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040984.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040167.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040159.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040139.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040135.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040131.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040116.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1050549.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1040026.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P10203042.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1020281.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/P1020276.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_9214.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_4954.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth,trim={0px 480px 0px 475px},clip]{Images/IMG_4920.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_4822.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_41652.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_4105.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_5302.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_5070.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth,trim={0px 480px 0px 475px},clip]{Images/IMG_4672.JPG}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_4098.jpeg}
+	\end{subfigure}
+	\centering
+	\begin{subfigure}[h]{0.24\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Images/IMG_0953.jpeg}
+	\end{subfigure}
+\end{figure}
+
+
+\newpage
+\bibliography{biblio}
+
+\end{document}
+

@@ -1,5 +1,11 @@
 # Commit Log
 
+#### 17.01.26
+
+- Changed level0 to meet 'different texture' criteria of brief - white with glassy track and static screen
+- Created seperate FloorPiece mesh creator functions
+- Started report in $\LaTeX$  
+
 #### 14.01.26
 
 - Added GeneralLevelLighting class that gives levels blue/red lighting

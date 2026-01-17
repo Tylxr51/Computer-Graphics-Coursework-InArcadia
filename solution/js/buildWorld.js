@@ -45,9 +45,8 @@ export default class World {
         const sceneFogNear = 0;
         this.sceneFogFar = 30;
 
-        this.scene.background = new THREE.Color( sceneBackgroundColor );                                // black background color
-		if ( !debug ) { this.scene.fog = new THREE.Fog( sceneFogColor, sceneFogNear, this.sceneFogFar ) }    // black fog
-
+        this.scene.background = new THREE.Color( sceneBackgroundColor );                                        // default black background color
+		if ( !debug ) { this.scene.fog = new THREE.Fog( sceneFogColor, sceneFogNear, this.sceneFogFar ) }       // default black fog
 
         // RENDERER INIT
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );

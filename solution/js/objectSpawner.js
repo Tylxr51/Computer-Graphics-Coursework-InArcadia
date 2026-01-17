@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FLOOR_MESH_CREATOR_DIRECTORIES } from './levelDirectories.js';
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
@@ -79,15 +80,15 @@ function initRectAreaLight() {
 export class GeneralLevelLighting {
 
     // PURPOSE: As described above
-    constructor( gameWorld ) {
+    constructor( gameWorld, skyColor, groundColor ) {
 
-        const blueRedHemisphereLight = new THREE.HemisphereLight( 0xff0000, 0x0000ff, 2 );      // blue sky color, red sky color
-        blueRedHemisphereLight.position.set( 20, 20, 0 );       // position above level
-        gameWorld.scene.add( blueRedHemisphereLight );          // spawn light in current scene
+        const hemisphereLight = new THREE.HemisphereLight( skyColor, groundColor, 2 );
+        hemisphereLight.position.set( 20, 20, 0 );       // position above level
+        gameWorld.scene.add( hemisphereLight );          // spawn light in current scene
 
         // add light helper if debug mode is on
-        const blueRedHemisphereLightHelper = new THREE.HemisphereLightHelper( blueRedHemisphereLight, 5 );
-        if ( debug ) { gameWorld.scene.add( blueRedHemisphereLightHelper ) };
+        const hemisphereLightHelper = new THREE.HemisphereLightHelper( hemisphereLight, 5 );
+        if ( debug ) { gameWorld.scene.add( hemisphereLightHelper ) };
 
     }
     
@@ -275,7 +276,7 @@ export class OutOfBoundsPlatform extends triggerPlatform {
 export class Screen {
     
     // Create planes and lights and spawn them at set positions
-    constructor( gameWorld ) {
+    constructor( gameWorld, imageOnScreen ) {
         
         this.gameWorld = gameWorld;
         
@@ -304,7 +305,7 @@ export class Screen {
               uniforms : { shapeWidth : { value : screenWidth },                                // pass screenWidth for vertex shader to calculate curvature
                            shapeHeight : { value : screenHeight },                              // pass screenHeight for vertex shader to calculate curvature
                            uTime : { value : 0 },                                               // pass time variable for fragment shader scanline animation
-                           uScreen : { value : loadedTextures['image_on_screen'] },             // pass screen texture image
+                           uScreen : { value : imageOnScreen },             // pass screen texture image
                            isFlickerOn : {value : Number( isFlickerOn ) }                       // pass boolean to turn screen flickering on or off
                          }
             });
@@ -508,13 +509,8 @@ export class FloorPiece {
     // PURPOSE: Define variables for cuboid and call createFloorBody() and createFloorMesh() functions
     constructor( gameWorld, position, size, colorHue ) {
 
-        this.colorHue = colorHue;
-
-        // allows other objects to set floor to white by sending a hue value over 2
-        if (this.colorHue > 2) { this.colorLightness = 1.0 }
-        else { this.colorLightness = 0.6 }
-        
         this.gameWorld = gameWorld;
+        this.colorHue = colorHue;        
 
         // define variables for position, rotation, and size
         this.floorMass = 0;                                                         // immovable
@@ -569,44 +565,33 @@ export class FloorPiece {
 
     }
 
-    // refactor
+    // PURPOSE: Create mesh for floor piece.
+    // USED BY FloorPiece.constructor()
     createFloorMesh() {
 
-        let floorGeometry = new THREE.BoxGeometry( this.floorSize.x, 
-                                                   this.floorSize.y, 
-                                                   this.floorSize.z 
-                                                 );
+        //  set floor to white by sending a hue value over 2 ( for making spawn platform ), otherwise call level-appropriate floor mesh creator
+        if (this.colorHue > 2) { 
+            
+            this.colorLightness = 1.0 
+            const floorGeometry = new THREE.BoxGeometry( this.floorSize.x, 
+                                                         this.floorSize.y, 
+                                                         this.floorSize.z 
+                                                       );
 
-        let color = new THREE.Color();                          // make color object to populate later
+            const floorMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff, roughness: 0.1, metalness: 0.3 } );
+            this.floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
         
-        floorGeometry = floorGeometry.toNonIndexed();           // gives a triangle/square effect
-
-        const position = floorGeometry.attributes.position;     // get vertex position 
-
-        const colors = [];                                      // list to populate
-
-        for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-            // set vertex color
-            color.setHSL(  this.colorHue + Math.random() * 0.2, 
-                                0.75, 
-                                this.colorLightness + Math.random() * 0.3, 
-                                THREE.SRGBColorSpace 
-                             );
-            colors.push( color.r, color.g, color.b );           // populate colors list
-
         }
 
-        // set vertex colors from list
-        floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+        else { 
+            
+            this.colorLightness = 0.6;
+            const createFloorMesh = FLOOR_MESH_CREATOR_DIRECTORIES[ levelIndex ];
+            this.floorMesh = createFloorMesh( this.floorSize, this.colorHue, this.colorLightness );
+        
+        }
 
-        // make material from vertex colors
-        const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xbcbcbc, roughness: 0.1, metalness: 0.3, vertexColors: true  } );
-        floorMaterial.castShadow = false;
-        floorMaterial.receiveShadow = true;
-
-        // make floorMesh using floorGeometry and floorMaterial
-        this.floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
+        
 
         // set floorMesh position
         this.floorMesh.position.set( this.ammoFloorPosition.x(), 

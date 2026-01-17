@@ -31,7 +31,8 @@ let mouseControlsSensitivity = 0.7;             // mouse sensitivity set here
 
 // textures to load on startup
 const textureFileNames = [
-    'image_on_screen',
+    'screen_arcade_image',
+    'screen_static_image',
     'press_space_to_jump',
     'wasd',
     'space_+_w',

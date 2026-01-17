@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { FloorPiece, Staircase, SpawnArea, Screen, LevelCompletePlatform, OutOfBoundsPlatform, ImagePlate, GeneralLevelLighting} from './objectSpawner.js'
  
 
-
-export default function createLevel0Scene( args ) {
+// PURPOSE: create environment objects for level 0
+// USED BY: LevelManager.chooseLevelScene()
+export function createLevel0Scene( args ) {
 
     // unpack args
     const { gameWorld,
@@ -24,6 +25,18 @@ export default function createLevel0Scene( args ) {
 
 
     //////////////////////////////////////
+    ///////////// BACKGROUND /////////////
+    //////////////////////////////////////
+
+    const backgroundColor = 0xdddddd;
+    const fogColor = 0xdddddd;
+
+    gameWorld.scene.background = new THREE.Color( backgroundColor );
+    if ( !debug ) { gameWorld.scene.fog.color.set( fogColor ) };
+
+
+
+    //////////////////////////////////////
     /////////// OUT OF BOUNDS ////////////
     //////////////////////////////////////
 
@@ -34,7 +47,7 @@ export default function createLevel0Scene( args ) {
     /////////////// SCREEN ///////////////
     //////////////////////////////////////
 
-    const screen = new Screen( gameWorld );
+    const screen = new Screen( gameWorld, loadedTextures['screen_static_image'] );
 
 
     //////////////////////////////////////
@@ -413,7 +426,23 @@ export default function createLevel0Scene( args ) {
     ///////// GENERAL LIGHTING ///////////
     //////////////////////////////////////
     
-    const levelLighting = new GeneralLevelLighting( gameWorld );
+    const skyColor = 0xffffff;
+    const groundColor = 0xffffff;
+    const levelLighting = new GeneralLevelLighting( gameWorld, skyColor, groundColor );
+
+
+
+    //////////////////////////////////////
+    ////////// EXTRA LIGHTING ////////////
+    //////////////////////////////////////
+
+    const groundLight = new THREE.DirectionalLight( 0xffffff, 1 );
+    groundLight.position.set( 0, 10, 10 );
+    groundLight.target.position.set( 0, 0, 0 );
+    gameWorld.scene.add( groundLight );
+
+    const groundLightHelper = new THREE.DirectionalLightHelper( groundLight, 5 );
+    if ( debug ) { gameWorld.scene.add( groundLightHelper ) };
 
 
 
@@ -429,5 +458,40 @@ export default function createLevel0Scene( args ) {
 
 
     return { screen, levelCompletePlatform, outOfBoundsPlatform }           // needed by levelManager
+
+}
+
+// PURPOSE: create floor meshes for level 0
+// USED BY: FloorPiece.createFloorMesh()
+export function createLevel0FloorMesh( floorSize, colorHue, colorLightness ) {
+
+    let floorGeometry = new THREE.BoxGeometry( floorSize.x, 
+                                               floorSize.y, 
+                                               floorSize.z 
+                                             );
+
+    
+    // make glassy material
+    const floorMaterial = new THREE.MeshPhysicalMaterial( { color: 0x000000,
+                                                            metalness: 0.9,
+                                                            roughness: 0.4,
+                                                            clearcoat: 1,
+                                                            transparent: true,
+                                                            opacity: .8,
+                                                            reflectivity: 0.2,
+                                                            ior: 0.9,
+                                                            iridescence: 1,
+                                                            iridescenceIOR: 1.5,
+                                                            side: THREE.FrontSide
+                                                          });
+    floorMaterial.castShadow = false;
+    floorMaterial.receiveShadow = true;
+
+    // make floorMesh using floorGeometry and floorMaterial
+    const floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
+
+
+
+    return floorMesh
 
 }
